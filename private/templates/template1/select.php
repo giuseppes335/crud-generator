@@ -1,118 +1,139 @@
 <?php
 
-require_once 'component.php';
+require_once 'relation.php';
 
-class Select extends Component {
+class Select extends Relation {
 
-    function __construct($request, $session, $application, $id, $label, $name, $format, $mysql_type, $nullable = 'not null', $dataset_table, $dataset_id, $dataset_label, $view = null, $multiselect = null) {
+    function __construct(Array $params) {
 
-        parent::__construct($request, $session, $application);
+        parent::__construct($params);
 
-        $this->id = $id;
+        $this->id = $params['id'];
 
-        $this->label = $label;
+        $this->label = $params['label'];
 
-        $this->name = $name;
+        $this->name = $params['name'];
 
-        $this->format = $format;
+        $this->format = $params['format'];
 
-        $this->mysql_type = $mysql_type;
+        $this->mysql_type = $params['mysql_type'];
 
-        $this->nullable = $nullable;
+        $this->nullable = $params['nullable'];
 
-        $this->dataset_table = $dataset_table;
+        $this->dataset_table = $params['dataset_table'];
 
-        $this->dataset_id = $dataset_id;
+        $this->dataset_id = $params['dataset_id'];
 
-        $this->dataset_label = $dataset_label;
+        $this->dataset_label = $params['dataset_label'];
 
-        $this->view = $view;
+        $this->view = $params['view'];
 
-        $this->multiselect = $multiselect;
-
-    }
-
-    function get_errors() {
-
-        $errors = [];
-
-        if (strpos($this->nullable, 'not null') && $this->value === null) {
-
-            array_push($errors, "Campo richiesto");
-
-        }
-
-
-        if (strpos($this->nullable, 'unique')) {
-
-            $rows = $this->application->select($this->insert_table, [], [$this->name => $this->value]);
-
-            if (count($rows) > 0) {
-
-                array_push($errors, "Campo duplicato");
-
-            }
-
-        }
-
-        if ($this->format === 's' && !is_string($this->value)) {
-
-            array_push($errors, "Campo non testuale");
-
-        } else if ($this->format === 'i' && !is_int($this->value)) {
-
-            array_push($errors, "Campo non intero");
-
-        } else if ($this->format === 'd' && !is_float($this->value)) {
-
-            array_push($errors, "Campo non decimale");
-
-        }
-
+        $this->multiselect = $params['multiselect'];
 
     }
 
-    function reset() {
-        
-    }
-
-    function bootstrap() {
-
-
-    }
 
     function get() {
 
         $application_host = $this->application->host;
 
-        $path = $this->application->path;
+        $application_path = $this->application->path;
 
         $filters = [];
 
         // Filter for initial loading on edit 
         if ( property_exists($this, 'parent') && $this->view && isset($this->view[2]) && $this->parent[$this->view[2][0]->name]) {
 
-            $filters[$this->view[2][1]] = $this->parent[$this->view[2][0]->name];
+            $filters[$this->view[2][1]] = $this->get_query_param_part($this->view[2][1], [$this->parent[$this->view[2][0]->name], 'eq']);
 
         }
 
-        // Filter for change on edit or insert
-        if ($this->view && isset($this->view[2]) && isset($this->request->get[$this->view[2][0]->name])) {
+        
+        // Filter for change on edit or insert 
 
-            $filters[$this->view[2][1]] = $this->request->get[$this->view[2][0]->name];
+        if ($this->view && isset($this->view[2]) && isset($this->request->get[$this->view[2][0]->name])) {
+            echo $this->view[2][1];
+            $filters[$this->view[2][1]] = $this->get_query_param_part($this->view[2][1], [$this->request->get[$this->view[2][0]->name], 'eq']);
         
         }
 
 
         $records = [];
+
+
+
+        $selects = [];
+        
+        $this->update_authorized_fields();
+        
+        $this->update_creators();  
+        
+        $creators = null;
+        
+        if ($this->auth) {
+            
+            if (property_exists($this, 'authorized_fields')) {
+                
+                $authorized_fields = [];
+                
+                if ($this->authorized_fields) {
+                    
+                    if (count($this->authorized_fields) > 0) {
+                        
+                        
+                        if (in_array($this->dataset_id, $this->authorized_fields)) {
+                            
+                            array_push($selects, $this->dataset_id);
+                            
+                        }
+                        
+                        if (in_array($this->dataset_label, $this->authorized_fields)) {
+                            
+                            array_push($selects, $this->dataset_label);
+                            
+                        }
+                        
+                    } else {
+                        
+                        array_push($selects, $this->dataset_id);
+                        
+                        array_push($selects, $this->dataset_label);
+                        
+                    }
+                    
+                } else {
+                    
+                    array_push($selects, $this->dataset_id);
+                    
+                    array_push($selects, $this->dataset_label);
+                    
+                }
+                
+            }
+            
+            if (property_exists($this, 'creators')) {
+                
+                $creators = [];
+                
+                if ($this->creators && count($this->creators) > 0) {
+                    
+                    $creators = $this->creators;
+                    
+                }
+                
+            }
+            
+        }
+        
     
+                
         if ($this->view && isset($this->view[1]) && $this->view[1]) {
 
-            $records = $this->application->select($this->view[0], $this->view[1], $filters);
+            $records = $this->application->select($this->view[0], $this->view[1], $filters, $selects, false, 0, $creators);
 
         } else {
 
-            $records = $this->application->select($this->dataset_table, [], $filters);
+            $records = $this->application->select($this->dataset_table, [], $filters, $selects, false, 0, $creators);
         }
 
         $script = '';
@@ -122,7 +143,7 @@ class Select extends Component {
       
             $component = $this->view[2][2];
 
-            $script = "let new_url = '$application_host/$path/$component.php';";
+            $script = "let new_url = '$application_host/$application_path/$component.php';";
 
             /*
             if ($this->view && isset($this->view[3])) {
@@ -153,7 +174,7 @@ class Select extends Component {
         if (count($records) > 0) {
 
             $options = [];
-
+        
             foreach($records as $record) {
 
                 $id = $record[$this->dataset_id];
@@ -189,7 +210,7 @@ class Select extends Component {
             
             echo <<<EOT
             <option value="">...</option>
-            EOT;
+EOT;
 
             foreach($options as $id => $label) {
 
@@ -201,7 +222,7 @@ class Select extends Component {
 
                 echo <<<EOT
                 <option $selected_tag value="$id">$label</option>
-                EOT;
+EOT;
 
             }
 
@@ -234,18 +255,25 @@ class Select extends Component {
         }
 
 
+        $disabled = '';
+
+        if (property_exists($this, 'disabled') && $this->disabled) {
+
+            $disabled = $this->disabled;
+
+        }
+
+
         $select = <<<EOT
-        <!-- custom content -->
         <div class="field">
-        <img class="loader" src="$application_host/img/loader.png" onload="$script">
+        <img class="loader" src="$application_host/$application_path/img/loader.png" onload="$script">
         <label for="$this->id">$this->label</label>
-        <select id="$this->id" name="$name" $multiselect_tag>
+        <select id="$this->id" name="$name" $multiselect_tag $disabled>
         $options_output
         </select>
-        <div>$errors_output</div>
+        <div class="error">$errors_output</div>
         </div>
-        <!-- end custom content -->
-        EOT;
+EOT;
 
         if (isset($this->request->get['options'])) {
 
@@ -301,6 +329,14 @@ class Select extends Component {
 
     }
 
+    function put() {
+
+    }
+
+    function delete() {
+        
+    }
+
     function set_value($value) {
 
         $this->value = $value;
@@ -337,6 +373,14 @@ class Select extends Component {
         $this->insert_table = $table;
 
     }
+
+    function disable() {
+
+        $this->disabled = 'disabled';
+
+    }
+
+
 
     
 }

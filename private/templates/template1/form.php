@@ -77,6 +77,12 @@ class Form extends Relation {
             }
 
             $creator_id = null;
+            
+            if (isset($record[count($this->fields) + 1])) {
+                
+                $creator_id = $record[count($this->fields) + 1];
+                
+            }
 
             $this->application->insert($formats, $this->insert_table, $row, $creator_id);
 
@@ -284,65 +290,91 @@ EOT;
         
         $this->update_creators();
         
-        if (property_exists($this, 'authorized_fields')) {
+        if ($this->auth) {
             
-            $fields = null;
+            $authorized_fields = null;
             
-            if ($this->authorized_fields) {
+            $creators = null;
+            
+            if (property_exists($this, 'authorized_fields')) {
                 
-                $fields = [];
+                $authorized_fields = [];
                 
-                foreach($this->fields as $field) {
+                if ($this->authorized_fields) {
                     
-                    if (in_array($field->name, $this->authorized_fields)) {
+                    if (count($this->authorized_fields) > 0) {
                         
-                        array_push($fields, $field->name);
+                        foreach($this->fields as $field) {
+                            
+                            if (in_array($field->name, $this->authorized_fields)) {
+                                
+                                array_push($authorized_fields, $field->name);
+                                
+                            }
+                            
+                        }
+                        
+                    } else {
+                        
+                        foreach($this->fields as $field) {
+                            
+                            array_push($authorized_fields, $field->name);
+                            
+                        }
+                        
+                        
+                    }
+                    
+                } else {
+                    
+                    foreach($this->fields as $field) {
+                        
+                        array_push($authorized_fields, $field->name);
                         
                     }
                     
                 }
                 
-            } else {
+            }
+            
+            if (property_exists($this, 'creators')) {
                 
-                $fields = [];
+                $creators = [];
                 
-                foreach($this->fields as $field) {
+                if ($this->creators && count($this->creators) > 0) {
                     
-                    array_push($fields, $field->name);
+                    $creators = $this->creators;
                     
                 }
                 
             }
             
-            $creators = null;
-            
-            if (property_exists($this, 'creators') && $this->creators) {
+            // Else it will go on error
+            if (null !== $authorized_fields) {
                 
-                $creators = $this->creators;
+                if (null !== $creators) {
+                    
+                    $this->get1($authorized_fields);
+                    
+                } else {
+                    
+                    $errors = [];
+                    
+                    array_push($errors, 'Permesso negato.');
+                    
+                    $this->session->push_errors('popup_errors', [
+                        'errors' => $errors
+                    ]);
+                    
+                }
+                
+                
                 
             }
-            
-            if (count($creators) > 0) {
-                
-                $this->get1($fields);
-                
-            } else {
-                
-                $errors = [];
-                
-                array_push($errors, 'Permesso negato.');
-                
-                $this->session->push_errors('popup_errors', [
-                    'errors' => $errors
-                ]);
-                
-            }
-            
-
             
         } else {
             
-            $this->get1($fields);
+            $this->get1();
             
         }
 
@@ -382,14 +414,61 @@ EOT;
         
         
         $this->update_authorized_fields();
-
+        
         $fields_for_validation = $this->fields;
         
-        if (property_exists($this, 'authorized_fields') && $this->authorized_fields) {
+        if ($this->auth) {
             
-            $fields_for_validation = $this->authorized_fields;
+            $authorized_fields = null;
             
-        }
+            if (property_exists($this, 'authorized_fields')) {
+                
+                $authorized_fields = [];
+                
+                if ($this->authorized_fields) {
+                    
+                    if (count($this->authorized_fields) > 0) {
+                        
+                        foreach($this->fields as $field) {
+                            
+                            if (in_array($field->name, $this->authorized_fields)) {
+                                
+                                array_push($authorized_fields, $field);
+                                
+                            }
+                            
+                        }
+                        
+                    } else {
+                        
+                        foreach($this->fields as $field) {
+                            
+                            array_push($authorized_fields, $field);
+                            
+                        }
+                        
+                        
+                    }
+                    
+                } else {
+                    
+                    foreach($this->fields as $field) {
+                        
+                        array_push($authorized_fields, $field);
+                        
+                    }
+                    
+                }
+                
+            }
+            
+            if (null !== $authorized_fields) {
+                
+                $fields_for_validation = $authorized_fields;
+                
+            }
+            
+        } 
         
      
 
@@ -554,24 +633,71 @@ EOT;
         
         $authorized_update = true;
         
-        if (property_exists($this, 'authorized_fields')) {
-       
-            foreach($fields as $field => $value) {
+        if ($this->auth) {
+            
+            $authorized_fields = null;
+            
+            if (property_exists($this, 'authorized_fields')) {
+                
+                $authorized_fields = [];
                 
                 if ($this->authorized_fields) {
                     
-                    if (!in_array($field, $this->authorized_fields)) {
+                    if (count($this->authorized_fields) > 0) {
+                        
+                        foreach($this->fields as $field) {
+                            
+                            if (in_array($field->name, $this->authorized_fields)) {
+                                
+                                array_push($authorized_fields, $field->name);
+                                
+                            }
+                            
+                        }
+                        
+                    } else {
+                        
+                        foreach($this->fields as $field) {
+                            
+                            array_push($authorized_fields, $field->name);
+                            
+                        }
+                        
+                        
+                    }
+                    
+                } else {
+                        
+                    foreach($this->fields as $field) {
+                        
+                        array_push($authorized_fields, $field->name);
+                        
+                    }
+                    
+                }
+                
+            } else {
+                
+                $authorized_update = false;
+                
+            }
+            
+            if (null !== $authorized_fields) {
+                
+                foreach($fields as $field => $value) {
+                    
+                    if (!in_array($field, $authorized_fields)) {
                         
                         $authorized_update = false;
                         
                     }
                     
-                } 
+                }
                 
             }
+            
+        } 
         
-        }
-
         
         if (isset($this->request->get['id']) && $this->request->get['id']) {
             
@@ -591,8 +717,6 @@ EOT;
             
             
         }
-        
-        
         
         
 

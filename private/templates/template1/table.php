@@ -393,7 +393,7 @@ EOT;
 
             foreach($this->fields as $field) {
 
-                if (in_array($field[1], array_column($authorized_fields, 1))) {
+                if (in_array($field[1], $authorized_fields)) {
 
                     array_push($fields, $field);
 
@@ -730,69 +730,128 @@ EOT;
         // Delete
         if (isset($this->request->get['id']) && $this->request->get['id'] && isset($this->request->get['delete'])) {
 
-            // TODO ACL
+            if ($this->auth) {
+                
+                
+                // ACL delete
+                $resource = $this->auth['resource'];
+                
+                $users_table_name = $this->auth['acl']['users_table_name'];
+                
+                $cruds_table_name = $this->auth['acl']['cruds_table_name'];
+                
+                $cd_authorized = $this->authorized_cd($users_table_name, $resource, $cruds_table_name);
+                
+                if(false !== $cd_authorized) {
+                    
+                    $this->delete1();
+                    
+                } else {
+                    
+                    $errors = [];
+                    
+                    array_push($errors, 'Permesso negato.');
+                    
+                    $this->session->push_errors('popup_errors', [
+                        'errors' => $errors
+                    ]);
+                    
+                    
+                }
+                
+            } else {
+                
+                $this->delete1();
+                
+            }
             
-            $this->delete1();
 
             
+
+            
+        
+        }
+          
         // List
-        } else {
+        if ($this->auth) {
+
+            $authorized_fields = null;
+            
+            $creators = null;
             
             if (property_exists($this, 'authorized_fields')) {
                 
-                $auhorized_fields = null;
-                    
+                $authorized_fields = [];
+                
                 if ($this->authorized_fields) {
                     
-                    $auhorized_fields = [];
-                    
-                    foreach($this->fields as $field) {
+                    if (count($this->authorized_fields) > 0) {
                         
-                        if (in_array($field, $this->authorized_fields)) {
+                        foreach($this->fields as $field) {
                             
-                            array_push($auhorized_fields, $field);
+                            if (in_array($field[1], $this->authorized_fields)) {
+                                
+                                array_push($authorized_fields, $field[1]);
+                                
+                            }
                             
                         }
+                        
+                    } else {
+                        
+                        foreach($this->fields as $field) {
+                            
+                            array_push($authorized_fields, $field[1]);
+                            
+                        }
+                        
                         
                     }
                     
                 } else {
                     
-                    $auhorized_fields = [];
-                    
                     foreach($this->fields as $field) {
                         
-                        array_push($auhorized_fields, $field);
+                        array_push($authorized_fields, $field[1]);
                         
                     }
-                    
+                                            
                 }
+                     
+            }
+            
+            if (property_exists($this, 'creators')) {
                 
-                $creators = null;
+                $creators = [];
                 
-                if (property_exists($this, 'creators') && $this->creators) {
+                if ($this->creators && count($this->creators) > 0) {
                     
                     $creators = $this->creators;
                     
                 }
+                   
+            }
+            
+            if (null !== $authorized_fields && null !== $creators) {
                 
                 ob_start();
-                $this->print_list($auhorized_fields, $creators);
-                $output = ob_get_contents();
-                ob_end_clean();
-                echo $output;
-                
-            } else {
-                
-                ob_start();
-                $this->print_list();
+                $this->print_list($authorized_fields, $creators);
                 $output = ob_get_contents();
                 ob_end_clean();
                 echo $output;
                 
             }
-
+            
+        } else {
+            
+            ob_start();
+            $this->print_list();
+            $output = ob_get_contents();
+            ob_end_clean();
+            echo $output;
+            
         }
+        
 
         $this->push_list_stack($output);
 

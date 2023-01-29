@@ -170,13 +170,17 @@ foreach($schema_object['elements'] as $element) {
   
   $auth = null;
   
-  if (isset($element['auth']) && $element['auth'] === 0) {
+  if (isset($element['auth']) && $element['auth'] == 0) {
       
       $auth = 'auth: *authorized-user';
       
   } else {
       
-      $auth = 'auth: *acl';
+      $auth = <<<EOT
+auth: 
+        resource: $insert_table 
+        acl: *acl
+EOT;
       
   }
 
@@ -239,7 +243,7 @@ EOT;
 
       $component = 'select';
 
-      $table = $field0[1]['plural_name'];
+      $table = str_replace('-', '_', $field0[1]['plural_name']);
       
       $table_alias = $table . '_' . $index;
 

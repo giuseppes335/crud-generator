@@ -108,7 +108,6 @@ abstract class Relation {
             ], [], false, 0, []);
 
             if (count($resources_groups) > 0) {
-
                 
                 $resources_groups0 = array_column($resources_groups, 'resources_name');
 
@@ -116,7 +115,14 @@ abstract class Relation {
 
                 foreach($resources_groups as $resources_group) {
 
-                    $fields = explode(',', $resources_group['r_resources_groups_fields']);
+                    $fields = [];
+                    
+                    // different from '' or null
+                    if ($resources_group['r_resources_groups_fields']) {
+                    
+                        $fields = explode(',', $resources_group['r_resources_groups_fields']);
+                        
+                    }
 
                     $m_fields = array_merge($m_fields, $fields);
 
@@ -134,7 +140,7 @@ abstract class Relation {
 
             } else {
 
-                false;
+                return false;
 
             }
 
@@ -165,8 +171,15 @@ abstract class Relation {
                 $m_fields = [];
 
                 foreach($resources_groups as $resources_group) {
-
-                    $fields = explode(',', $resources_group['ru_resources_groups_fields']);
+                    
+                    $fields = [];
+                    
+                    // different from '' or null
+                    if ($resources_group['ru_resources_groups_fields']) {
+                        
+                        $fields = explode(',', $resources_group['ru_resources_groups_fields']);
+                        
+                    }
 
                     $m_fields = array_merge($m_fields, $fields);
 
@@ -186,7 +199,7 @@ abstract class Relation {
 
             } else {
 
-                false;
+                return false;
 
             }
 
@@ -233,7 +246,7 @@ abstract class Relation {
 
             } else {
 
-                false;
+                return false;
 
             }
 
@@ -248,6 +261,8 @@ abstract class Relation {
     function update_creators() {
            
         if ($this->auth) {
+            
+            unset($this->creators);
             
             $creators = null;
             
@@ -284,7 +299,7 @@ abstract class Relation {
                 ]);
                 
                 $sharings = $this->application->select($sharings_table_name, [], [
-                    $sharings_table_name_sharing_with => $this->get_query_param_part($sharings_table_name_sharing_with, [$users_table_name_group_id, 'eq'])
+                    $sharings_table_name_sharing_with => $this->get_query_param_part($sharings_table_name_sharing_with, [$logged_users[0][$users_table_name_group_id], 'eq'])
                 ]);
                 
                 foreach($sharings as $sharing) {
@@ -357,6 +372,8 @@ EOT;
         
         if ($this->auth) {
             
+            unset($this->authorized_fields);
+            
             if (isset($this->auth['storage'])) {
                  
                 $users_table_name = $this->auth['storage']['table_name'];
@@ -399,21 +416,21 @@ EOT;
                 
                 
                 $cd_authorized = $this->authorized_cd($users_table_name, $resource, $cruds_table_name);
-                
+
                 $ru_authorized = $this->authorized_ru($users_table_name, $resource, $rus_table_name);
-                
+
                 $r_authorized = $this->authorized_r($users_table_name, $resource, $rs_table_name);
-                
-                if($cd_authorized) {
+
+                if(false !== $cd_authorized) {
                     
                     $this->authorized_fields = null;
                     
-                } else if ($ru_authorized) {
+                } else if (false !== $ru_authorized) {
                     
                     $this->authorized_fields = $ru_authorized;
                     
-                } else if ($r_authorized && $readable_only) {
-                    
+                } else if (false !== $r_authorized && $readable_only) {
+
                     $this->authorized_fields = $r_authorized;
                     
                 } else {
