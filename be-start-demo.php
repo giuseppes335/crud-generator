@@ -67,7 +67,7 @@ if (count($error_messages) > 0) {
 
     $host = $configuration->host;
 
-    header("Location: $host/preview.php?demo_id=$demo_id");
+    header("Location: $host/personalizza-demo.php?demo_id=$demo_id");
 
     exit;
 
