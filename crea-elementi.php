@@ -2,9 +2,9 @@
 
 <section class="primary-font-color">
     
-    <h1 style="font-size: 32px;">Crea elemento</h1>
+    <h1 style="font-size: 32px;">Crea elementi</h1>
 
-    <form action="be-crea-elemento.php" method="post">
+    <form action="be-crea-elementi.php" method="post">
 
         <div class="form-item" style="margin-top: 8px;">
             <label for="schema">Schema</label>

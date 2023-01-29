@@ -71,7 +71,7 @@ class Request {
 
     function is_tool_panel() {
 
-        return '/demo.php' === $_SERVER['SCRIPT_NAME'] || '/scegli-un-applicazione.php' === $_SERVER['SCRIPT_NAME'] || '/personalizza-demo.php' === $_SERVER['SCRIPT_NAME'] || '/crea-elemento.php' === $_SERVER['SCRIPT_NAME'];
+        return '/demo.php' === $_SERVER['SCRIPT_NAME'] || '/scegli-un-applicazione.php' === $_SERVER['SCRIPT_NAME'] || '/personalizza-demo.php' === $_SERVER['SCRIPT_NAME'] || '/crea-elementi.php' === $_SERVER['SCRIPT_NAME'];
 
     }
 
