@@ -1,4 +1,4 @@
-# crud-generator
+# Crud generator
 
 Launch local mysql database and create schema
 <pre>
@@ -71,7 +71,7 @@ components:
       application: *application
       language: it
       menu: *menu
-      title: ACL
+      title: Demo
 <br>
   footer: &footer
     name: footer

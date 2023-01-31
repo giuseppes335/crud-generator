@@ -130,7 +130,7 @@ echo <<<EOT
       application: *application
       language: it
       menu: *menu
-      title: ACL
+      title: Demo
 
   footer: &footer
     name: footer
