@@ -99,6 +99,22 @@ class Session extends Relation {
         }
 
     }
+    
+    function get_errors_output($field) {
+        
+        $errors = $this->get_errors($field);
+        
+        $errors_output = '';
+        
+        if ($errors && isset($errors['errors'])) {
+            
+            $errors_output = implode(', ', $errors['errors']);
+            
+        }
+        
+        return $errors_output;
+        
+    }
 
     function clear_errors() {
 
@@ -236,5 +252,6 @@ EOT;
         unset($_SESSION['PREV']);
 
     }
+   
     
 }

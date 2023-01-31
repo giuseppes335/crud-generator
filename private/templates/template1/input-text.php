@@ -20,63 +20,35 @@ class InputText extends Relation {
 
         $this->nullable = $params['nullable'];
 
-        $this->value = '';
-
         $this->is_password = $params['is_password'];
+        
+        $this->init();
 
     }
-
-    function set_value($value) {
-
-        $this->value = $value;
-
+    
+    function init() {
+        
+        $this->value = '';
+        
+        $this->disabled = '';
+        
     }
 
     function get() {
 
-        ob_start();
+?>
 
-        $id = $this->id;
+<div class="field">
+	
+	<label for="<?= $this->id ?>"><?= $this->label ?></label>
+	
+	<input type="text" id="<?= $this->id ?>" name="<?= $this->name ?>" value="<?= $this->value ?>" <?= $this->disabled ?>/>
 
-        $label = $this->label;
+	<div class="error"><?= $this->session->get_errors_output($this->name) ?></div>
 
-        $name = $this->name;
+</div>
 
-        $value = $this->value;
-
-        // TODO
-        $errors = $this->session->get_errors($this->name);
-
-        $errors_output = '';
-
-        if ($errors && isset($errors['errors'])) {
-
-            $errors_output = implode(', ', $errors['errors']);
-
-        }
-        //
-
-        $disabled = '';
-
-        if (property_exists($this, 'disabled') && $this->disabled) {
-
-            $disabled = $this->disabled;
-
-        }
-
-        echo <<<EOT
-        <div class="field">
-        <label for="$id">$label</label>
-        <input type="text" id="$id" name="$name" value="$value" $disabled/>
-        <div class="error">$errors_output</div>
-        </div>
-EOT;
-
-        $output = ob_get_contents();
-
-        ob_end_clean();
-
-        echo $output;
+<?php
 
     }
 
@@ -91,11 +63,19 @@ EOT;
     function delete() {
         
     }
-
-    function disable() {
-
-        $this->disabled = 'disabled';
-
+    
+    function set_value($value) {
+        
+        $this->value = $value;
+        
     }
+    
+    function disable() {
+        
+        $this->disabled = 'disabled';
+        
+    }
+
+
     
 }

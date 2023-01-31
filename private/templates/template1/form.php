@@ -162,11 +162,7 @@ EOT;
 
 
 
-            if (method_exists($field, 'set_action_component')) {
 
-                $field->set_action_component($this->action_component);
-
-            }
 
             if (method_exists($field, 'set_parent') && isset($this->request->get['id']) && $this->request->get['id']) {
 
