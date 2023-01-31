@@ -72,9 +72,52 @@ foreach($schema_object['elements'] as $element) {
 
 $menu_items = implode(",", $menu_items_array);
 
+<<<<<<< HEAD
+=======
 
 $login = null;
 
+if (isset($element['auth'])) {
+    
+    $login = <<<EOT
+  form-login: &form-login
+    name: form-login
+    component: login.php
+    params:
+      request: *request
+      session: *session
+      application: *application
+      action_component: form-login
+      page: login.php
+      redirect_component: users
+      users_table: users
+      username_field: users_email
+      password_field: users_password
+
+
+  login: &login
+    name: login
+    component: pagelogin.php
+    params:
+      request: *request
+      session: *session
+      application: *application
+      header: *header
+      language: it
+      title: Login
+      content: *form-login
+      footer: *footer
+EOT;
+    
+}
+
+echo <<<EOT
+<pre>
+>>>>>>> 5b41949ada19abc8d7649ac14873d8cc4eb1fa8a
+
+$login = null;
+
+<<<<<<< HEAD
 if (isset($element['auth'])) {
     
     $login = <<<EOT
@@ -140,6 +183,8 @@ echo <<<EOT
       session: *session
       application: *application
 
+=======
+>>>>>>> 5b41949ada19abc8d7649ac14873d8cc4eb1fa8a
 $login
 
 </pre>
