@@ -127,8 +127,8 @@ class Application extends Relation {
             array_push($table_definitions, "$field->name $field->mysql_type $field->nullable");
 
             if (isset($field->dataset_table)) {
-
-                $now = time() . "$index";
+                 
+                $now = str_replace('-', '_', $index);
 
                 array_push($fks_definitions, "constraint fk_$now" . "_$table" . "_to_$field->dataset_table foreign key($field->name) references $field->dataset_table($field->dataset_id) on delete cascade");
 
@@ -144,7 +144,7 @@ class Application extends Relation {
         }
         
         $query = "create table if not exists $table ($table" . "_id bigint unsigned auto_increment primary key, " . implode(', ', $table_definitions) .", " . $table . "_creator bigint unsigned null, " . $table . "_created_at timestamp default CURRENT_TIMESTAMP, " . $table . "_updated_at timestamp default CURRENT_TIMESTAMP $fks);";
-        //echo "$query<br><br>";
+        echo "$query<br><br>";
         $this->mysqli->query($query);
 
     }

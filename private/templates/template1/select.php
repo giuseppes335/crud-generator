@@ -55,7 +55,7 @@ class Select extends Relation {
 
     	<option value="">...</option>
     
-        <?php foreach($this->get_records() as $record): ?>
+        <?php foreach($this->application->select($this->dataset_table) as $record): ?>
         
         <option <?= $this->get_selected($record[$this->dataset_id]) ?> value="<?= $record[$this->dataset_id] ?>"><?= $record[$this->dataset_label] ?></option>
         
@@ -110,76 +110,5 @@ class Select extends Relation {
         return $selected_tag;
         
     }
-    
-    
-    function get_records() {
-        
-        $selects = [];
-        
-        $this->update_authorized_fields();
-        
-        $this->update_creators();
-        
-        $creators = null;
-        
-        if ($this->auth) {
-            
-            if (property_exists($this, 'authorized_fields')) {
-                
-                $authorized_fields = [];
-                
-                if ($this->authorized_fields) {
-                    
-                    if (count($this->authorized_fields) > 0) {
-                        
-                        
-                        if (in_array($this->dataset_id, $this->authorized_fields)) {
-                            
-                            array_push($selects, $this->dataset_id);
-                            
-                        }
-                        
-                        if (in_array($this->dataset_label, $this->authorized_fields)) {
-                            
-                            array_push($selects, $this->dataset_label);
-                            
-                        }
-                        
-                    } else {
-                        
-                        array_push($selects, $this->dataset_id);
-                        
-                        array_push($selects, $this->dataset_label);
-                        
-                    }
-                    
-                } else {
-                    
-                    array_push($selects, $this->dataset_id);
-                    
-                    array_push($selects, $this->dataset_label);
-                    
-                }
-                
-            }
-            
-            if (property_exists($this, 'creators')) {
-                
-                $creators = [];
-                
-                if ($this->creators && count($this->creators) > 0) {
-                    
-                    $creators = $this->creators;
-                    
-                }
-                
-            }
-            
-        }
-        
-        return $this->application->select($this->dataset_table, [], [], $selects, false, 0, $creators);
-        
-    }
 
-    
 }

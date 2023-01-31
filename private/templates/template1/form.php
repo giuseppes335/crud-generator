@@ -17,7 +17,38 @@ class Form extends Relation {
         $this->redirect_component = $params['redirect_component'];
 
         $this->seed = $params['seed'];
+        
+        $this->row = null;
+ 
+        
+        $this->init();
 
+    }
+    
+    function init() {
+        
+        if (isset($this->request->get['id']) && $this->request->get['id']) {
+            
+            $this->row = $this->application->find($this->insert_table, $this->request->get['id']);
+            
+        } 
+        
+        foreach($this->fields as $field) {
+            
+            if (isset($this->row[$field->name])) {
+                
+                $field->set_value($this->row[$field->name]);
+                
+            } 
+
+            if ($this->session->errors() && $this->session->get_errors($field->name)) {
+                
+                $field->set_value($this->session->get_errors($field->name)['old_value']);
+                
+            }
+            
+        }
+        
     }
 
 
@@ -31,26 +62,7 @@ class Form extends Relation {
     // TODO
     function bootstrap() {
 
-        
-        $fields_to_migrate = [];
-
-        foreach($this->fields as $field) {
-
-            
-
-            // Check for multiselect
-            if (property_exists($field, 'multiselect') && $field->multiselect) {
-
-            } else {
-
-                array_push($fields_to_migrate, $field);
-                
-            }
-
-        }
-
-
-        $this->application->migrate($this->insert_table, $fields_to_migrate);
+        $this->application->migrate($this->insert_table, $this->fields);
 
         $row = [];
 
@@ -91,177 +103,23 @@ class Form extends Relation {
 
     }
 
-    function get1($authorized_fields = null) {
-            
-        ob_start();
-
-        $action = $this->action_component . '.php';
-
-        $action .= '?' . $this->request->query_string;
-
-        echo <<<EOT
-        <form action="$action" method="post" autocomplete="off" >
-        <!--<div style="display: flex; flex-direction: column;">-->
-EOT;
-
-
-
-
-        
-        $row = [];
-
-        if (isset($this->request->get['id']) && $this->request->get['id']) {
-
-            $row = $this->application->find($this->insert_table, $this->request->get['id']);
-        
-        } 
-
-        foreach($this->request->get as $get_field => $get_value) {
-
-            if (in_array($get_field, array_column($this->fields, 'name'))) {
-
-                $row[$get_field] = $get_value;
-
-            }
-
-        }
-
-        $counter = 0;
-
-        foreach($this->fields as $field) {
-
-
-
-
-            // More row forms
-            /*
-            $check_open_div = false;
-
-            $check_close_div = false;
-
-
-            if ($counter % 3 === 0) {
-
-                $check_open_div = true;
-
-            } else if ($counter % 3 === 2) {
-
-                $check_close_div = true;
-
-            }
-
-            if ($check_open_div) {
-
-                echo <<<EOT
-                <div style="display: flex;">
-                EOT;
-
-            }
-            */
-            //
-
-
-
-
-
-            if (method_exists($field, 'set_parent') && isset($this->request->get['id']) && $this->request->get['id']) {
-
-                $field->set_parent($row);
-
-            }
-
-
-            // Check for multiselect
-            // Set values (plural)
-            if (property_exists($field, 'multiselect') && $field->multiselect) {
-
-                if (isset($this->request->get['id']) && $this->request->get['id']) {
-
-                    $options = $this->application->select($field->multiselect[0], [], [
-                        $field->multiselect[2] => $this->get_query_param_part($field->multiselect[2], [$this->request->get['id'], 'eq'])
-                    ]);
-
-                    $values = array_column($options, $field->multiselect[1]);
-
-                    $field->set_values($values);
-
-                }
-
-            // Or set value (singular)
-            } else {
-
-
-                if (isset($row[$field->name])) {
-
-                    $field->set_value($row[$field->name]);
-
-                } 
-
-
-            }
-
-
-            if ($this->session->errors() && $this->session->get_errors($field->name)) {
-
-                $field->set_value($this->session->get_errors($field->name)['old_value']);
-
-            }
-
-
-
-
-            if ($authorized_fields) {
-
-                if (in_array($field->name, $authorized_fields)) {
-
-                    $field->get();
-
-                }
-
-            } else {
-
-                $field->get();
-
-            }
-
+    function get() {
             
 
+?>
 
-            // Inside this errors where rendered
-            /*
-            echo <<<EOT
-            <div style="width: 33%; margin: 4px;">
-            EOT;
-            $field->get();
-            echo <<<EOT
-            </div>
-            EOT;
+<form action="<?= $this->action_component . '.php?' . $this->request->query_string ?>" method="post" autocomplete="off" >
 
+	<?php foreach($this->fields as $field): ?>
+	
+	<?= $field->get() ?>
+	
+	<?php endforeach; ?>
 
-            
-            if ($check_close_div) {
+<button class="button" type="submit">Submit</button>
+</form>
 
-                echo <<<EOT
-                </div>
-                EOT;
-
-            }
-
-            $counter++;
-            */
-
-
-        }
-
-        /*
-        if (!$check_close_div) {
-
-            echo <<<EOT
-            </div>
-            EOT;
-
-        }
-        */
+<?php
 
         // There errors where cleared
         if ($this->session->errors()) {
@@ -270,112 +128,6 @@ EOT;
 
         }
 
-
-
-        echo <<<EOT
-        <!--</div>-->
-        <button class="button" type="submit">Submit</button>
-        </form>
-EOT;
-
-    }
-
-    function get() {
-        
-        $this->update_authorized_fields();
-        
-        $this->update_creators();
-        
-        if ($this->auth) {
-            
-            $authorized_fields = null;
-            
-            $creators = null;
-            
-            if (property_exists($this, 'authorized_fields')) {
-                
-                $authorized_fields = [];
-                
-                if ($this->authorized_fields) {
-                    
-                    if (count($this->authorized_fields) > 0) {
-                        
-                        foreach($this->fields as $field) {
-                            
-                            if (in_array($field->name, $this->authorized_fields)) {
-                                
-                                array_push($authorized_fields, $field->name);
-                                
-                            }
-                            
-                        }
-                        
-                    } else {
-                        
-                        foreach($this->fields as $field) {
-                            
-                            array_push($authorized_fields, $field->name);
-                            
-                        }
-                        
-                        
-                    }
-                    
-                } else {
-                    
-                    foreach($this->fields as $field) {
-                        
-                        array_push($authorized_fields, $field->name);
-                        
-                    }
-                    
-                }
-                
-            }
-            
-            if (property_exists($this, 'creators')) {
-                
-                $creators = [];
-                
-                if ($this->creators && count($this->creators) > 0) {
-                    
-                    $creators = $this->creators;
-                    
-                }
-                
-            }
-            
-            // Else it will go on error
-            if (null !== $authorized_fields) {
-                
-                if (null !== $creators) {
-                    
-                    $this->get1($authorized_fields);
-                    
-                } else {
-                    
-                    $errors = [];
-                    
-                    array_push($errors, 'Permesso negato.');
-                    
-                    $this->session->push_errors('popup_errors', [
-                        'errors' => $errors
-                    ]);
-                    
-                }
-                
-                
-                
-            }
-            
-        } else {
-            
-            $this->get1();
-            
-        }
-
-        $this->print_errors_popup();
-        
     }
 
 
@@ -408,67 +160,9 @@ EOT;
         }
 
         
-        
-        $this->update_authorized_fields();
-        
-        $fields_for_validation = $this->fields;
-        
-        if ($this->auth) {
-            
-            $authorized_fields = null;
-            
-            if (property_exists($this, 'authorized_fields')) {
-                
-                $authorized_fields = [];
-                
-                if ($this->authorized_fields) {
-                    
-                    if (count($this->authorized_fields) > 0) {
-                        
-                        foreach($this->fields as $field) {
-                            
-                            if (in_array($field->name, $this->authorized_fields)) {
-                                
-                                array_push($authorized_fields, $field);
-                                
-                            }
-                            
-                        }
-                        
-                    } else {
-                        
-                        foreach($this->fields as $field) {
-                            
-                            array_push($authorized_fields, $field);
-                            
-                        }
-                        
-                        
-                    }
-                    
-                } else {
-                    
-                    foreach($this->fields as $field) {
-                        
-                        array_push($authorized_fields, $field);
-                        
-                    }
-                    
-                }
-                
-            }
-            
-            if (null !== $authorized_fields) {
-                
-                $fields_for_validation = $authorized_fields;
-                
-            }
-            
-        } 
-        
-     
-
         // Validation
+        $fields_for_validation = $this->fields;
+
         foreach($fields_for_validation as $field) {
 
             // Not necessary to test isset($this->request->post[$field->name]) to check validation
@@ -589,177 +283,27 @@ EOT;
         } 
         //
 
+   
+        
+        // Acl post
         $formats = '';
-
-        $fields = [];
-
-        $multiselects = [];
-
+        
         foreach($this->fields as $field) {
-
-            // Check for multiselect
-            if (!$field->multiselect) {
-
-                if (property_exists($field, 'is_password') && (boolean)$field->is_password) {
-
-                    $fields[$field->name] = password_hash($this->request->post[$field->name], PASSWORD_DEFAULT);
-
-                } else {
-
-                    $fields[$field->name] = $this->request->post[$field->name];
-
-                }
-
-                $formats .= $field->format;
-
-            } else {
-
-                array_push($multiselects, $field);
-
-            }
-
-           
-
-        }
-        
-        
-        $this->update_authorized_fields(false);
-        
-        $this->update_creators();
-        
-        $authorized_update = true;
-        
-        if ($this->auth) {
             
-            $authorized_fields = null;
+            $fields[$field->name] = $this->request->post[$field->name];
             
-            if (property_exists($this, 'authorized_fields')) {
-                
-                $authorized_fields = [];
-                
-                if ($this->authorized_fields) {
-                    
-                    if (count($this->authorized_fields) > 0) {
-                        
-                        foreach($this->fields as $field) {
-                            
-                            if (in_array($field->name, $this->authorized_fields)) {
-                                
-                                array_push($authorized_fields, $field->name);
-                                
-                            }
-                            
-                        }
-                        
-                    } else {
-                        
-                        foreach($this->fields as $field) {
-                            
-                            array_push($authorized_fields, $field->name);
-                            
-                        }
-                        
-                        
-                    }
-                    
-                } else {
-                        
-                    foreach($this->fields as $field) {
-                        
-                        array_push($authorized_fields, $field->name);
-                        
-                    }
-                    
-                }
-                
-            } else {
-                
-                $authorized_update = false;
-                
-            }
-            
-            if (null !== $authorized_fields) {
-                
-                foreach($fields as $field => $value) {
-                    
-                    if (!in_array($field, $authorized_fields)) {
-                        
-                        $authorized_update = false;
-                        
-                    }
-                    
-                }
-                
-            }
+            $formats .= $field->format;
             
         } 
         
-        
-        if (isset($this->request->get['id']) && $this->request->get['id']) {
-            
-            $row = $this->application->find($this->insert_table, $this->request->get['id']);
-            
-            if (property_exists($this, 'creators')) {
-                
-                $creator_field = $this->insert_table . '_creator';
-                
-                if (!in_array($row[$creator_field], $this->creators)) {
-                    
-                    $authorized_update = false;
-                    
-                }
-                
-            }
-            
-            
-        }
-        
-        
-
-        // Acl post
-        if(!$authorized_update) {
-            
-            $errors = [];
-            
-            array_push($errors, 'Record non salvato. Permesso negato.');
-            
-            $this->session->push_errors('popup_errors', [
-                'errors' => $errors
-            ]);
-            
-            header("Location: $error_redirect");
-            
-            exit;
-            
-        }
-
-        $id = null;
 
         if (isset($this->request->get['id']) && $this->request->get['id']) {
 
             $this->application->update($formats, $this->insert_table, $fields, $this->request->get['id']);
-            
-            $id = $this->request->get['id'];
 
         } else {
 
-            $creator_id = null;
-
-            if ($this->auth) {
-
-                $creator_id = $this->session->get_logged_user();
-
-            }
-
-            $id = $this->application->insert($formats, $this->insert_table, $fields, $creator_id);
-
-        }
-
-        foreach($multiselects as $m_fields) {
-
-            $m_fields->set_related($id);
-        
-            $m_fields->post();
+            $this->application->insert($formats, $this->insert_table, $fields);
 
         }
 
