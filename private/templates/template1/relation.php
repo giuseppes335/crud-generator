@@ -259,7 +259,7 @@ abstract class Relation {
     }
     
     function update_creators() {
-           
+        
         if ($this->auth) {
             
             unset($this->creators);

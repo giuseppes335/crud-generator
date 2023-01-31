@@ -72,37 +72,12 @@ foreach($schema_object['elements'] as $element) {
 
 $menu_items = implode(",", $menu_items_array);
 
-echo <<<EOT
-<pre>
 
-  menu: &menu
-    name: menu
-    component: menu.php
-    params:
-      request: *request
-      session: *session
-      application: *application
-      items: [$menu_items]
+$login = null;
 
-  header: &header
-    name: header
-    component: header.php
-    params:
-      request: *request
-      session: *session
-      application: *application
-      language: it
-      menu: *menu
-      title: ACL
-
-  footer: &footer
-    name: footer
-    component: footer.php
-    params:
-      request: *request
-      session: *session
-      application: *application
-
+if (isset($element['auth'])) {
+    
+    $login = <<<EOT
   form-login: &form-login
     name: form-login
     component: login.php
@@ -130,6 +105,42 @@ echo <<<EOT
       title: Login
       content: *form-login
       footer: *footer
+EOT;
+    
+}
+
+echo <<<EOT
+<pre>
+
+  menu: &menu
+    name: menu
+    component: menu.php
+    params:
+      request: *request
+      session: *session
+      application: *application
+      items: [$menu_items]
+
+  header: &header
+    name: header
+    component: header.php
+    params:
+      request: *request
+      session: *session
+      application: *application
+      language: it
+      menu: *menu
+      title: Demo
+
+  footer: &footer
+    name: footer
+    component: footer.php
+    params:
+      request: *request
+      session: *session
+      application: *application
+
+$login
 
 </pre>
 EOT;
@@ -174,7 +185,7 @@ foreach($schema_object['elements'] as $element) {
       
       $auth = 'auth: *authorized-user';
       
-  } else {
+  } else if (isset($element['auth']) && $element['auth'] == 1) {
       
       $auth = <<<EOT
 auth: 
@@ -250,6 +261,18 @@ EOT;
       $table_id = $table . '_id';    
 
       $table_label = $table . '_' . $field0[2];
+      
+      $auth = null;
+      
+      if (isset($element['auth']) && $element['auth'] == 0) {
+          
+          $auth = <<<EOT
+              auth:
+                acl: *acl
+                resource: $table
+EOT;
+          
+      }
 
       $type = <<<EOT
 format: i
@@ -260,9 +283,7 @@ format: i
               dataset_label: $table_label
               view: []
               multiselect: []
-              auth:
-                acl: *acl
-                resource: $table
+              $auth
 EOT;
 
       $id = "$plural_name-$field";
@@ -415,6 +436,9 @@ EOT;
 
 }
 
+$keys = array_keys($schema_object['elements']);
+
+$start_element = str_replace('-', '_', $schema_object['elements'][$keys[0]]['plural_name']);
 
 $index = <<<EOT
   index: &index
@@ -424,7 +448,7 @@ $index = <<<EOT
       request: *request
       session: *session
       application: *application
-      start_page: login
+      start_page: $start_element
       bootstraps:
 EOT;
 
