@@ -1,3 +1,34 @@
+Skip to content
+Search or jump to…
+Pull requests
+Issues
+Codespaces
+Marketplace
+Explore
+ 
+@giuseppes335 
+giuseppes335
+/
+crud-generator
+Public
+Cannot fork because you own this repository and are not a member of any organizations.
+Code
+Issues
+Pull requests
+Actions
+Projects
+Wiki
+Security
+Insights
+Settings
+crud-generator/be-crea-elementi.php /
+@giuseppes335
+giuseppes335 fixes
+Latest commit d92dda7 yesterday
+ History
+ 1 contributor
+485 lines (299 sloc)  8.57 KB
+
 <?php 
 
 require_once 'private/be/global_import.php';
@@ -10,18 +41,14 @@ $schema_object = spyc_load($schema);
 echo <<<EOT
 <pre>
 imports: []
-
 components:
-
   auth-storage: &auth-storage
     table_name: users
     field_username: users_email
     field_password: users_password
-
   authorized-user: &authorized-user
     storage: *auth-storage
     username: admin1@admins.it 
-
   acl: &acl
     groups_table_name: groups
     users_table_name: users
@@ -29,19 +56,15 @@ components:
     rus_table_name: ru_resources_groups
     rs_table_name: r_resources_groups
     sharings_table_name: sharings
-
   request: &request
     name: request
     component: request.php
-
   session: &session
     name: session
     component: session.php
-
   application: &application
     name: application
     component: application.php
-
 </pre>      
 EOT;
 
@@ -72,8 +95,6 @@ foreach($schema_object['elements'] as $element) {
 
 $menu_items = implode(",", $menu_items_array);
 
-<<<<<<< HEAD
-=======
 
 $login = null;
 
@@ -93,8 +114,6 @@ if (isset($element['auth'])) {
       users_table: users
       username_field: users_email
       password_field: users_password
-
-
   login: &login
     name: login
     component: pagelogin.php
@@ -113,48 +132,6 @@ EOT;
 
 echo <<<EOT
 <pre>
->>>>>>> 5b41949ada19abc8d7649ac14873d8cc4eb1fa8a
-
-$login = null;
-
-<<<<<<< HEAD
-if (isset($element['auth'])) {
-    
-    $login = <<<EOT
-  form-login: &form-login
-    name: form-login
-    component: login.php
-    params:
-      request: *request
-      session: *session
-      application: *application
-      action_component: form-login
-      page: login.php
-      redirect_component: users
-      users_table: users
-      username_field: users_email
-      password_field: users_password
-
-
-  login: &login
-    name: login
-    component: pagelogin.php
-    params:
-      request: *request
-      session: *session
-      application: *application
-      header: *header
-      language: it
-      title: Login
-      content: *form-login
-      footer: *footer
-EOT;
-    
-}
-
-echo <<<EOT
-<pre>
-
   menu: &menu
     name: menu
     component: menu.php
@@ -163,7 +140,6 @@ echo <<<EOT
       session: *session
       application: *application
       items: [$menu_items]
-
   header: &header
     name: header
     component: header.php
@@ -174,7 +150,6 @@ echo <<<EOT
       language: it
       menu: *menu
       title: Demo
-
   footer: &footer
     name: footer
     component: footer.php
@@ -182,11 +157,7 @@ echo <<<EOT
       request: *request
       session: *session
       application: *application
-
-=======
->>>>>>> 5b41949ada19abc8d7649ac14873d8cc4eb1fa8a
 $login
-
 </pre>
 EOT;
 
@@ -512,19 +483,3 @@ EOT;
 }
 
 echo "<pre>$index</pre>";
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
