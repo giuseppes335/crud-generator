@@ -91,30 +91,6 @@ class Table extends Relation {
     // Print filter form header
     function print_filter_form() {
 
-        $prefix = $this->select_table;
-
-        $onsubmit = "event.preventDefault(); let filter = document.getElementById('$prefix-filter'); let filter_value = document.getElementById('$prefix-filter-value'); let new_url = window.location.href;";
-
-        $onsubmit .= " let operator = document.getElementById('$prefix-operator');";
-
-        $onsubmit .= " if (!url_exists_param(new_url, filter.value + '[0]')) {";
-
-        $onsubmit .= " new_url = url_with_new_param(new_url, filter.value + '[0]', filter_value.value);";
-
-        $onsubmit .= " new_url = url_with_new_param(new_url, filter.value + '[1]', operator.value);";
-
-        $onsubmit .= " }";
-
-        $onsubmit .= " else {";
-
-        $onsubmit .= " new_url = url_with_new_param(new_url, filter.value + '[2]', filter_value.value);";
-
-        $onsubmit .= " new_url = url_with_new_param(new_url, filter.value + '[3]', operator.value);";
-
-        $onsubmit .= " }";
-
-        $onsubmit .= " window.location.href = new_url;";
-
 ?>
 
 <form class="filter-form" onsubmit="<?= $onsubmit ?>">
@@ -130,8 +106,8 @@ class Table extends Relation {
         </select>
 
         <select id="<?= $prefix ?>-operator" name="operator">
-            <option value="like">Like</option>
             <option value="eq">=</option>
+            <option value="like">Like</option>
             <option value="lt"><</option>
             <option value="gt">></option>
             <option value="let"><=</option>
@@ -144,67 +120,16 @@ class Table extends Relation {
     
     </div>
 </form>
+
+<div class="filters-labels">
+
+	<?php foreach($this->request->get as $get_field => $get_values): ?>
+	
+	<a style="text-decoration: none;" href="" onclick="<?= $this->get_onclick_filters_labels($get_field) ?>"><span><?= $this->get_filters_label($get_field) ?></span></a>
+	
+	<?php endforeach; ?>
         
 <?php
-
-    }
-
-
-    // Print applied filter
-    function print_applied_filter() {
-
-        echo <<<EOT
-        <div class="filters-labels">
-EOT;
-
-        foreach($this->request->get as $get_field => $get_values) {
-
-            foreach($this->fields as $field) {
-
-                if (is_array($get_values) && isset($get_values[0]) && isset($get_values[1])) {
-
-                    $get_value = $get_values[0];
-
-                    $operator = $get_values[1];
-
-                    $field_name = $field[1];
-                    
-                    $label = $field[0];
-
-                    $complete_label = "$label $operator $get_value";
-
-                    if (isset($get_values[2]) && isset($get_values[3])) {
-
-                        $get_value = $get_values[2];
-
-                        $operator = $get_values[3];
-
-                        $complete_label .= " and $operator $get_value";
-
-                    }
-
-                    if ($field_name === $get_field) {
-
-                        $value = $get_value;
-
-                        echo <<<EOT
-                        <a style="text-decoration: none;" href="" onclick="event.preventDefault(); let new_url = remove_url_param(window.location.href, '$field_name' + '[0]'); new_url = remove_url_param(new_url, '$field_name' + '[1]'); new_url = remove_url_param(new_url, '$field_name' + '[2]'); window.location.href = remove_url_param(new_url, '$field_name' + '[3]');"><span>$complete_label</span></a>
-EOT;
-
-                    }
-
-
-                }
-
-                
-
-            }
-
-        }
-
-        echo <<<EOT
-        </div>
-EOT;
 
     }
 
@@ -540,8 +465,6 @@ EOT;
 
         $this->print_filter_form();
 
-        $this->print_applied_filter();
-
         $this->print_header_table_container();
 
 
@@ -588,5 +511,83 @@ EOT;
     function delete() {
 
     }
+    
+    function get_onsubmit_filters_form() {
+        
+?>
+
+event.preventDefault(); 
+
+let filter = document.getElementById('<?= $this->select_table ?>-filter'); 
+
+let filter_value = document.getElementById('<?= $this->select_table ?>-filter-value'); 
+
+let new_url = window.location.href;
+
+let operator = document.getElementById('<?= $this->select_table ?>-operator');
+
+if (!url_exists_param(new_url, filter.value + '[0]')) {
+
+	new_url = url_with_new_param(new_url, filter.value + '[0]', filter_value.value);
+	
+	new_url = url_with_new_param(new_url, filter.value + '[1]', operator.value);
+
+} else {
+
+	new_url = url_with_new_param(new_url, filter.value + '[2]', filter_value.value);
+	
+	new_url = url_with_new_param(new_url, filter.value + '[3]', operator.value);
+
+}
+
+window.location.href = new_url;
+
+<?php
+        
+    }
+    
+    // TODO
+    function get_onclick_filters_labels($get_field) {
+        
+?>
+
+event.preventDefault(); 
+
+let new_url = remove_url_param(window.location.href, '<?= $get_field ?>' + '[0]'); 
+
+new_url = remove_url_param(new_url, '<?= $get_field ?>' + '[1]'); 
+
+new_url = remove_url_param(new_url, '<?= $get_field ?>' + '[2]'); 
+
+window.location.href = remove_url_param(new_url, '<?= $get_field ?>' + '[3]');
+
+<?php        
+    }
+    
+    function get_filters_label($get_field) {
+        
+        
+        $label_array = [];
+        
+        $index = 0;
+        
+        while(isset($this->request->get[$get_field][$index]) && isset($this->request->get[$get_field][$index + 1])) {
+            
+            $label = $this->fields[$get_field]->label;
+            
+            $operator = $this->request->get[$get_field][$index];
+            
+            $value = $this->request->get[$get_field][$index + 1];
+            
+            array_push($label_array, "$label $operator $value");
+
+            $index = $index + 2;
+            
+        }
+        
+        return implode(' and ', $label_array);
+        
+    }
+    
     
 }

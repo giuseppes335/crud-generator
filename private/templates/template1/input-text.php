@@ -30,8 +30,6 @@ class InputText extends Relation {
         
         $this->value = '';
         
-        $this->disabled = '';
-        
     }
 
     function get() {
@@ -67,12 +65,6 @@ class InputText extends Relation {
     function set_value($value) {
         
         $this->value = $value;
-        
-    }
-    
-    function disable() {
-        
-        $this->disabled = 'disabled';
         
     }
 

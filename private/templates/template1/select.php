@@ -25,10 +25,6 @@ class Select extends Relation {
         $this->dataset_id = $params['dataset_id'];
 
         $this->dataset_label = $params['dataset_label'];
-
-        $this->view = $params['view'];
-
-        $this->multiselect = $params['multiselect'];
         
         $this->init();
 
@@ -37,8 +33,6 @@ class Select extends Relation {
     function init() {
         
         $this->value = '';
-        
-        $this->disabled = '';
         
     }
 
@@ -51,7 +45,7 @@ class Select extends Relation {
 
 	<label for="<?= $this->id ?>"><?= $this->label ?></label>
 
-	<select id="<?= $this->id ?>" name="<?= $this->name ?>" $multiselect_tag <?= $this->disabled ?>>
+	<select id="<?= $this->id ?>" name="<?= $this->name ?>" <?= $this->disabled ?>>
 
     	<option value="">...</option>
     
@@ -89,14 +83,7 @@ class Select extends Relation {
         $this->value = $value;
 
     }
-
-    function disable() {
-
-        $this->disabled = 'disabled';
-
-    }
-    
-    
+      
     function get_selected($value) {
         
         $selected_tag = '';
