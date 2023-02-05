@@ -90,10 +90,12 @@ class Table extends Relation {
 
     // Print filter form header
     function print_filter_form() {
+        
+        $prefix = $this->select_table;
 
 ?>
 
-<form class="filter-form" onsubmit="<?= $onsubmit ?>">
+<form class="filter-form" onsubmit="<?= $this->get_onsubmit_filters_form() ?>">
 	<div>
 	
         <select id="<?= $prefix ?>-filter" name="filter">
@@ -125,9 +127,17 @@ class Table extends Relation {
 
 	<?php foreach($this->request->get as $get_field => $get_values): ?>
 	
+	<?php $fields = array_filter($this->fields, function($field) use ($get_field)  {
+                return $field[1] === $get_field;
+	}); if (count($fields) > 0): ?>
+	
 	<a style="text-decoration: none;" href="" onclick="<?= $this->get_onclick_filters_labels($get_field) ?>"><span><?= $this->get_filters_label($get_field) ?></span></a>
 	
+	<?php endif; ?>
+	
 	<?php endforeach; ?>
+	
+</div>
         
 <?php
 
@@ -172,8 +182,7 @@ EOT;
 <div class="table-container"><a href="<?= $button_aggiungi_query_string ?>" class="button-a" onclick="<?= $onclick ?>">Aggiungi</a>
 
 <?php
-
-        
+     
     }
 
     // Print popup form
@@ -258,11 +267,8 @@ EOT;
             }
             
         }
-
-
-        $rows_filtered = [];
-
-        $rows = [0];
+        
+        $limit = 4;
 
         $offset = 0;
 
@@ -271,90 +277,49 @@ EOT;
             $offset = $this->request->get['page'] * 4;
 
         }
-
-        while (count($rows_filtered) < 4 && count($rows) !== 0) {
-
-            $rows = $this->application->select($this->select_table, $this->joins, $filters, $selects, true, $offset);
-
-            foreach($rows as $row) {
-
-                $new_row = $row;
-    
-                $check = true;
-    
-                if ($check && count($rows_filtered) < 4) {
-    
-                    array_push($rows_filtered, $new_row);
-    
-                }
-    
-            }
-
-            $offset = $offset + 4;
-
-        }
-
+        
+        $rows = $this->application->select($this->select_table, $this->joins, $filters, $selects, true, $offset, [], $limit);
         
 
+        
+        
+        
+?>
 
-        $application_host = $this->application->host;
+<tbody>
 
-        $application_path = $this->application->path;
-
-        $img_link = "$application_host/$application_path/img/link_FILL0_wght700_GRAD0_opsz48.png";
-
-        echo <<<EOT
-        <tbody>
-EOT;
-
-        foreach($rows_filtered as $row) {
-
-            $id = $row[$this->select_table . '_id'];
-
-            echo <<<EOT
-            <tr data-id="$id">
-EOT;
-
-            foreach($this->fields as $field) {
-
-                $td = $row[$field[1]];
-                
-                echo <<<EOT
-                <td><span>$field[0]</span>$td</td>
-EOT;
-
-            }
-
-
-
-            $script_name = $this->application->script_name;
-
-
-            // Clear query string
-            $query_string = $this->request->delete_query_string_param($this->request->query_string, 'delete');
-
-            $query_string = $this->request->update_query_string_param($query_string, 'nest', 'unnest', '');
-
-            $query_string = $this->request->set_query_string_param($query_string, 'id', $id);
-
-            $query_string_update = $this->request->set_query_string_param($query_string, 'popup', '');
-
-            $action_update = "$application_host$script_name$query_string_update";
-
-            $query_string_delete = $this->request->set_query_string_param($query_string, 'delete', '');
-
-            $action_delete = "$application_host$script_name$query_string_delete";
-
-            $img_edit = "$application_host/$application_path/img/edit_FILL0_wght700_GRAD0_opsz48.png";
-
-            $img_delete = "$application_host/$application_path/img/delete_FILL0_wght700_GRAD0_opsz48.png";
-
-
-            $action_page = $this->action_page;
-
-            $mobile_url = "$application_host/$application_path/$action_page.php$query_string_update";
-
-            $onclick_update = <<<EOT
+	<?php foreach($rows as $row): ?>
+	
+	<?php 
+	   $id = $row[$this->select_table . '_id'];
+	?>
+	
+	<tr data-id="<?= $id ?>">
+	
+    	<?php foreach($this->fields as $field): ?>
+    	<td><span><?= $field[0] ?></span><?= $row[$field[1]]?></td>
+    	<?php endforeach; ?>
+    	
+    	<?php 
+    	
+    	$application_host = $this->application->host;
+    	
+    	$application_path = $this->application->path;
+    	
+    	$img_link = "$application_host/$application_path/img/link_FILL0_wght700_GRAD0_opsz48.png";
+    	
+    	$img_edit = "$application_host/$application_path/img/edit_FILL0_wght700_GRAD0_opsz48.png";
+    	
+    	$img_delete = "$application_host/$application_path/img/delete_FILL0_wght700_GRAD0_opsz48.png";
+    	
+    	$query_string_delete = $this->request->set_query_string_param($this->cleared_query_string($id), 'delete', '');
+    	
+    	$action_page = $this->action_page;
+    	
+    	$query_string_update = $this->cleared_query_string($id);
+    	
+    	$mobile_url = "$application_host/$application_path/$action_page.php$query_string_update";
+    	$onclick_update = <<<EOT
             event.preventDefault();
             let new_href = this.href;
             if (window.innerWidth < 768) {
@@ -363,54 +328,58 @@ EOT;
             }
             window.location.href = new_href;
 EOT;
+    	   
+    	?>
+    	
+    	<td class="table-action-section"><a href="<?= $application_host?>/<?= $this->application->script_name?>/<?= $this->cleared_query_string($id) ?>" class="button-a" onclick="$onclick_update"><img class="icon invert" src="<?= $img_edit ?>"></a><a class="button-a" style="margin-left: 4px;" href="<?= $application_host?>/<?= $this->application->script_name?>/<?= $query_string_delete ?>"><img class="icon invert" src="<?= $img_delete ?>"></a>
+    	
+    	<?php 
+    	
+    	foreach($this->referencing as $table) {
 
-            // Td for actions
-            echo <<<EOT
-            <td class="table-action-section"><a href="$action_update" class="button-a" onclick="$onclick_update"><img class="icon invert" src="$img_edit"></a><a class="button-a" style="margin-left: 4px;" href="$action_delete"><img class="icon invert" src="$img_delete"></a>
-EOT;
+            $table_matched = $table;
 
-            // Td for references            
-            foreach($this->referencing as $table) {
+            if ($table_matched) {
 
-                $table_matched = $table;
+                $page = $table_matched[1];
 
-                if ($table_matched) {
+                $query_string = $table_matched[3] . "=$id&nest";
 
-                    $page = $table_matched[1];
-    
-                    $query_string = $table_matched[3] . "=$id&nest";
-    
-                    $label = $table_matched[2];
+                $label = $table_matched[2];
 
-                    $color = 'ffeb3bd6';
+                $color = 'ffeb3bd6';
 
-                    if (isset($table_matched[3])) {
+                if (isset($table_matched[3])) {
 
-                        $color = 'style="#' . $table_matched[3] . '"';
+                    $color = 'style="#' . $table_matched[3] . '"';
 
-                    }
-
-                    echo <<<EOT
-                    <a class="link" href="$application_host/$application_path/$page.php?$query_string" style="margin-left: 4px;"><span class="circle" $color><img class="invert icon" src="$img_link"></span> $label</a>
-EOT;
-    
                 }
+                    
+?>
+
+				<a class="link" href="<?= $application_host ?>/<?= $application_path ?>/<?= $page.php ?>?<?= $query_string ?>" style="margin-left: 4px;"><span class="circle" $color><img class="invert icon" src="<?= $img_link ?>"></span> $label</a>
+
+<?php
     
             }
-    
-            echo <<<EOT
-            </td>
-EOT;
-
-            echo <<<EOT
-            </tr>
-EOT;
 
         }
+            
+?>
+		</td>
+    	
+	</tr>	
+	
+	<?php endforeach; ?>
 
-        echo <<<EOT
-        </tbody>
-EOT;
+
+</tbody>
+
+
+
+
+<?php 
+       
 
     }
 
@@ -462,17 +431,16 @@ EOT;
 
 
     private function print_list() {
+        
+        if ($this->form && isset($this->request->get['popup'])) {
+            
+            $this->print_popup_form();
+            
+        }
 
         $this->print_filter_form();
 
         $this->print_header_table_container();
-
-
-        if ($this->form && isset($this->request->get['popup'])) {
-            
-            $this->print_popup_form();
-
-        }
 
         $this->print_header_table();
 
@@ -570,14 +538,17 @@ window.location.href = remove_url_param(new_url, '<?= $get_field ?>' + '[3]');
         $label_array = [];
         
         $index = 0;
-        
         while(isset($this->request->get[$get_field][$index]) && isset($this->request->get[$get_field][$index + 1])) {
+
+            $fields = array_filter($this->fields, function($field) use ($get_field)  {
+                return $field[1] === $get_field;
+            });
+
+            $label = array_values($fields)[0][0];
             
-            $label = $this->fields[$get_field]->label;
+            $value = $this->request->get[$get_field][$index];
             
-            $operator = $this->request->get[$get_field][$index];
-            
-            $value = $this->request->get[$get_field][$index + 1];
+            $operator = $this->request->get[$get_field][$index + 1];
             
             array_push($label_array, "$label $operator $value");
 
@@ -586,6 +557,45 @@ window.location.href = remove_url_param(new_url, '<?= $get_field ?>' + '[3]');
         }
         
         return implode(' and ', $label_array);
+        
+    }
+    
+    
+    function cleared_query_string($id) {
+        
+        $query_string = $this->request->delete_query_string_param($this->request->query_string, 'delete');
+        
+        $query_string = $this->request->update_query_string_param($query_string, 'nest', 'unnest', '');
+        
+        $query_string = $this->request->set_query_string_param($query_string, 'id', $id);
+        
+        $query_string = $this->request->set_query_string_param($query_string, 'popup', '');
+        
+        return $query_string;
+        
+    }
+    
+    
+    function get_onclick_update() {
+        
+        $action_page = $this->action_page;
+        
+        $query_string = $this->cleared_query_string($id);
+        
+        $mobile_url = "$application_host/$application_path/$action_page.php$query_string";
+        
+?>
+
+event.preventDefault();
+let new_href = this.href;
+if (window.innerWidth < 768) {
+    new_href = '<?= $mobile_url ?>';
+    new_href = url_with_new_param(new_href, 'mobile', '');
+}
+window.location.href = new_href;
+
+<?php        
+
         
     }
     

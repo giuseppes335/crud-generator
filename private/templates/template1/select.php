@@ -45,7 +45,7 @@ class Select extends Relation {
 
 	<label for="<?= $this->id ?>"><?= $this->label ?></label>
 
-	<select id="<?= $this->id ?>" name="<?= $this->name ?>" <?= $this->disabled ?>>
+	<select id="<?= $this->id ?>" name="<?= $this->name ?>">
 
     	<option value="">...</option>
     

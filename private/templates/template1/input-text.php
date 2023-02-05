@@ -40,7 +40,7 @@ class InputText extends Relation {
 	
 	<label for="<?= $this->id ?>"><?= $this->label ?></label>
 	
-	<input type="text" id="<?= $this->id ?>" name="<?= $this->name ?>" value="<?= $this->value ?>" <?= $this->disabled ?>/>
+	<input type="text" id="<?= $this->id ?>" name="<?= $this->name ?>" value="<?= $this->value ?>"/>
 
 	<div class="error"><?= $this->session->get_errors_output($this->name) ?></div>
 
