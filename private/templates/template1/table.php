@@ -306,19 +306,24 @@ EOT;
     	
     	$application_path = $this->application->path;
     	
-    	$img_link = "$application_host/$application_path/img/link_FILL0_wght700_GRAD0_opsz48.png";
+    	
     	
     	$img_edit = "$application_host/$application_path/img/edit_FILL0_wght700_GRAD0_opsz48.png";
     	
     	$img_delete = "$application_host/$application_path/img/delete_FILL0_wght700_GRAD0_opsz48.png";
     	
+    	$img_link = "$application_host/$application_path/img/link_FILL0_wght700_GRAD0_opsz48.png";
+    	
+    	
+    	
     	$query_string_delete = $this->request->set_query_string_param($this->cleared_query_string($id), 'delete', '');
     	
     	$action_page = $this->action_page;
     	
-    	$query_string_update = $this->cleared_query_string($id);
+    	$query_string_update = $this->request->set_query_string_param($this->cleared_query_string($id), 'popup', '');
     	
     	$mobile_url = "$application_host/$application_path/$action_page.php$query_string_update";
+    	
     	$onclick_update = <<<EOT
             event.preventDefault();
             let new_href = this.href;
@@ -331,7 +336,13 @@ EOT;
     	   
     	?>
     	
-    	<td class="table-action-section"><a href="<?= $application_host?>/<?= $this->application->script_name?>/<?= $this->cleared_query_string($id) ?>" class="button-a" onclick="$onclick_update"><img class="icon invert" src="<?= $img_edit ?>"></a><a class="button-a" style="margin-left: 4px;" href="<?= $application_host?>/<?= $this->application->script_name?>/<?= $query_string_delete ?>"><img class="icon invert" src="<?= $img_delete ?>"></a>
+    	<td class="table-action-section">
+    		<a href="<?= $application_host?><?= $this->application->script_name?><?= $query_string_update ?>" class="button-a" onclick="$onclick_update">
+    			<img class="icon invert" src="<?= $img_edit ?>">
+    		</a>
+    		<a class="button-a" style="margin-left: 4px;" href="<?= $application_host?><?= $this->application->script_name?><?= $query_string_delete ?>">
+    			<img class="icon invert" src="<?= $img_delete ?>">
+    		</a>
     	
     	<?php 
     	
@@ -452,6 +463,18 @@ EOT;
 
     function get() {
 
+        if (isset($this->request->get['id']) && $this->request->get['id'] && isset($this->request->get['delete'])) {
+            
+            $this->application->delete_record($this->select_table, $this->request->get['id']);
+            
+            $redirect = $this->request->referer;
+            
+            header("Location: $redirect");
+            
+            exit;
+        
+        }
+        
         $this->print_list_stack();
 
         $output = '';
@@ -568,8 +591,7 @@ window.location.href = remove_url_param(new_url, '<?= $get_field ?>' + '[3]');
         $query_string = $this->request->update_query_string_param($query_string, 'nest', 'unnest', '');
         
         $query_string = $this->request->set_query_string_param($query_string, 'id', $id);
-        
-        $query_string = $this->request->set_query_string_param($query_string, 'popup', '');
+       
         
         return $query_string;
         
@@ -581,6 +603,8 @@ window.location.href = remove_url_param(new_url, '<?= $get_field ?>' + '[3]');
         $action_page = $this->action_page;
         
         $query_string = $this->cleared_query_string($id);
+        
+        $query_string = $this->request->set_query_string_param($this->cleared_query_string($id), 'popup', '');
         
         $mobile_url = "$application_host/$application_path/$action_page.php$query_string";
         
