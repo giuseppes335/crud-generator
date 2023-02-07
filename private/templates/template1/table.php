@@ -242,7 +242,7 @@ class Table extends Relation {
 
 <div class="table-container">
 
-	<a href="<?= $button_aggiungi_query_string ?>" class="button-a" onclick="<?= $onclick ?>">Aggiungi</a>
+	<a href="<?= $button_aggiungi_query_string ?>" class="button-a" onclick="<?= $this->get_on_click() ?>">Aggiungi</a>
 
     <div class="scrollable">
     
@@ -281,7 +281,7 @@ class Table extends Relation {
                 	
                 	<td class="table-action-section">
                 	
-                		<a href="<?= $application_host?><?= $this->application->script_name?><?= $query_string_update ?>" class="button-a" onclick="<?= $this->get_onclick_update() ?>">
+                		<a href="<?= $application_host?><?= $this->application->script_name?><?= $query_string_update ?>" class="button-a" onclick="<?= $this->get_onclick_update($id) ?>">
                 			<img class="icon invert" src="<?= $img_edit ?>">
                 		</a>
                 		
@@ -494,7 +494,7 @@ window.location.href = remove_url_param(new_url, '<?= $get_field ?>' + '[3]');
     }
     
     
-    function get_onclick_update() {
+    function get_onclick_update($id) {
         
         $application_host = $this->application->host;
         
