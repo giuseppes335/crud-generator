@@ -1,6 +1,7 @@
 <?php 
 
 require_once 'private/be/global_import.php';
+require_once 'private/include/custom-schema.php';
 require_once "spyc/Spyc.php";
 
 function del_tree($dir) {
@@ -11,51 +12,34 @@ function del_tree($dir) {
     return rmdir($dir);
 }
 
-if (file_exists('private/demos/' . $request->get['demo_id'])) {
-    del_tree('private/demos/' . $request->get['demo_id']);
+
+
+$session_id = $session->get_session_id();
+
+$template_id = $_POST['template_id'];
+
+$template = $application->get_template($template_id);
+
+$demo_name = $_POST['name'];
+
+$demo_id = $application->insert_demo($demo_name, $template['default_schema'], $session_id, $template_id);
+
+$simple_schema = $_POST['schema'];
+
+$custom_schema = new CustomSchema($simple_schema);
+
+$schema = spyc_load($custom_schema->get());
+
+if (file_exists('private/demos/' . $demo_id)) {
+    del_tree('private/demos/' . $demo_id);
 }
 
+mkdir('private/demos/' . $demo_id . '/include', 0755, true);
 
-// If reset, delete old components
-
-
-$demo = $application->get_demo($request->get['demo_id']);
-
-$template = $application->get_template($demo['template_id']);
-
-if (isset($request->get['reset'])) {
-
-    $application->delete_components($request->get['demo_id']);
-
-    $files = scandir($template['path']);
-
-    array_shift($files);
-
-    array_shift($files);
-
-    foreach($files as $file) {
-
-        $file_content = file_get_contents($template['path'] . '/' . $file);
-
-        preg_match('/__construct\(.*\)/', $file_content, $matches);
-
-        $application->insert_component($file, $matches[0], $file_content, $request->get['demo_id']); 
-
-    }
-
-}
-//
+mkdir('private/demos/' . $demo_id . '/img', 0755, true);
 
 
-
-mkdir('private/demos/' . $request->get['demo_id'] . '/include', 0755, true);
-
-mkdir('private/demos/' . $request->get['demo_id'] . '/img', 0755, true);
-
-$schema = spyc_load($demo['schema0']);
-
-//echo '<pre>'; print_r($schema); echo '</pre>'; die;
-
+/*
 if (!isset($request->get['debug'])) {
 
     $components = $application->get_components($request->get['demo_id']);
@@ -79,6 +63,7 @@ if (!isset($request->get['debug'])) {
     }
 
 }
+*/
 
 $images = scandir($_SERVER['DOCUMENT_ROOT']. '/img');
 
@@ -90,7 +75,7 @@ foreach($images as $file) {
 
     $filename = $_SERVER['DOCUMENT_ROOT']. '/img/' . $file;
 
-    $destination = 'private/demos/' . $request->get['demo_id'] . '/img/' . $file;
+    $destination = 'private/demos/' . $demo_id . '/img/' . $file;
     
     copy($filename, $destination);
 
@@ -137,15 +122,17 @@ function get_php_output_recursive($node, &$dependencies, &$imports) {
 
         if (!in_array($var_name, $dependencies)) {
 
+            $prev_c_o = '';
+            
             if (isset($node['params'])) {
-
+                
                 foreach($node['params'] as $key => $param) {
 
                     $output = get_php_output_recursive($param, $dependencies, $imports);
 
                     array_push($params_list_output_array, "'$key' => $output[0]");
 
-                    $component_output .= $output[1];
+                    $prev_c_o .= $output[1];
 
                 }
 
@@ -155,7 +142,7 @@ function get_php_output_recursive($node, &$dependencies, &$imports) {
 
             $var_name = str_replace('-', '_', $var_name);
 
-            $component_output .= "\$$var_name = new $current_type_1($params_list_output);\n";
+            $component_output = $prev_c_o . "\$$var_name = new $current_type_1($params_list_output);\n";
             
             array_push($dependencies, $var_name);
 
@@ -287,8 +274,8 @@ EOT;
 
     $imports_output = implode("\n", $imports_map) . "\n";
 
-    $filename = 'private/demos/' . $request->get['demo_id'] . '/' . $component['name'] . '.php';
-    file_put_contents('private/demos/' . $request->get['demo_id'] . '/' . $component['name'] . '.php', $php_open_tag . $imports_output . $output1 . $output2);
+    $filename = 'private/demos/' . $demo_id . '/' . $component['name'] . '.php';
+    file_put_contents('private/demos/' . $demo_id . '/' . $component['name'] . '.php', $php_open_tag . $imports_output . $output1 . $output2);
     chmod($filename, 0755);
 
 }
@@ -297,9 +284,6 @@ EOT;
 //chmod('LICENSE', 'private/demos/' . $request->get['demo_id'] . '/LICENSE', 0755);
 
 
-$demo_id =  $demo['id'];
-
-$host = $configuration->host;
 
 $reset = '';
 
@@ -309,9 +293,7 @@ if (isset($request->get['reset'])) {
 
 }
 
-$_SESSION['CURRENT_DEMO_ID'] = $demo_id;
-
-header("Location: $host/private/demos/$demo_id/$reset");
+header("Location: private/demos/$demo_id/$reset");
 
 exit;
 
