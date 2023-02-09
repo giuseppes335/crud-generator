@@ -198,7 +198,7 @@ EOT;
             <option value="get">>=</option>
         </select>
         <input type="text" id="$prefix-filter-value" name="filter_value">
-        <button class="button" type="submit"><img class="icon invert" src="$img_search">Cerca</button>
+        <button class="button" type="submit">Cerca</button>
         </div>
         </form>
 EOT;
@@ -597,7 +597,7 @@ EOT;
 
             // Td for actions
             echo <<<EOT
-            <td class="table-action-section"><a href="$action_update" class="button-a" onclick="$onclick_update"><img class="icon invert" src="$img_edit"></a><a class="button-a" style="margin-left: 4px;" href="$action_delete"><img class="icon invert" src="$img_delete"></a>
+            <td class="table-action-section"><a href="$action_update" class="button-a" onclick="$onclick_update">Edit</a><a class="button-a" style="margin-left: 4px;" href="$action_delete">Delete</a>
 EOT;
 
             // Td for references            
