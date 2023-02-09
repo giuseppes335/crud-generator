@@ -214,7 +214,7 @@ class Form extends Relation {
             }
 
 
-            preg_match('/varchar\(([1-9][0-9]*)\)/', $field->mysql_type, $matches);
+            preg_match('/varchar\(([0-9]+)\)/', $field->mysql_type, $matches);
 
             if (count($matches) > 0 && $matches[1]) {
 
@@ -234,7 +234,7 @@ class Form extends Relation {
 
                 if (!$field->multiselect) {
 
-                    preg_match('/^[1-9][0-9]*$/', $this->request->post[$field->name], $matches);
+                    preg_match('/^[0-9]+$/', $this->request->post[$field->name], $matches);
 
                     if (count($matches) === 0) {
 
@@ -290,9 +290,13 @@ class Form extends Relation {
         
         foreach($this->fields as $field) {
             
-            $fields[$field->name] = $this->request->post[$field->name];
-            
-            $formats .= $field->format;
+            if ('' !== $this->request->post[$field->name]) {
+                
+                $fields[$field->name] = $this->request->post[$field->name];
+                
+                $formats .= $field->format;
+                
+            }
             
         } 
         

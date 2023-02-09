@@ -6,6 +6,7 @@ require_once "spyc/Spyc.php";
 $schema = $request->post['schema'];
 $schema_object = spyc_load($schema);
 
+ob_start();
 
 echo <<<EOT
 <pre>
@@ -468,8 +469,9 @@ EOT;
 
 echo "<pre>$index</pre>";
 
+$output = ob_get_contents();
 
-
+ob_end_clean();
 
 
 

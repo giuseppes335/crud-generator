@@ -8,7 +8,7 @@
 
         <div class="form-item" style="margin-top: 8px;">
             <label for="schema">Schema</label>
-            <textarea name="schema" id="schema" style="height: 600px;"></textarea>
+            <textarea name="schema" id="schema" style="height: 300px;"></textarea>
         </div>
 
         <div class="form-item" style="margin-top: 8px; overflow: auto;">
