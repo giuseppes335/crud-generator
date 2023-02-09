@@ -104,7 +104,7 @@ class Table extends Relation {
 
         <input type="text" id="<?= $prefix ?>-filter-value" name="filter_value">
         
-        <button class="button" type="submit"><img class="icon invert" src="<?= $this->application->host ?>/<?= $this->application->path ?>/img/search_FILL0_wght700_GRAD0_opsz48.png">Cerca</button>
+        <button class="button" type="submit">Cerca</button>
     
     </div>
 </form>
@@ -175,20 +175,7 @@ class Table extends Relation {
         $script_name = $this->application->script_name;
         
         
-        
-        $img_edit = "$application_host/$application_path/img/edit_FILL0_wght700_GRAD0_opsz48.png";
-        
-        $img_delete = "$application_host/$application_path/img/delete_FILL0_wght700_GRAD0_opsz48.png";
-        
-        $img_link = "$application_host/$application_path/img/link_FILL0_wght700_GRAD0_opsz48.png";
-        
-        $img_arrow_down = "$application_host/$application_path/img/arrow_drop_up_FILL0_wght700_GRAD0_opsz48.png";
-        
-        $img_arrow_up = "$application_host/$application_path/img/arrow_drop_down_FILL0_wght700_GRAD0_opsz48.png";
-        
-        
-        
-
+ 
         $selects = $this->selects;
 
         
@@ -242,67 +229,75 @@ class Table extends Relation {
 
 <div class="table-container">
 
-	<a href="<?= $button_aggiungi_query_string ?>" class="button-a" onclick="<?= $this->get_on_click() ?>">Aggiungi</a>
 
+	
     <div class="scrollable">
     
-        <table class="table">
+    	<div style="flex-grow: 1;">
+    	
+    		<div style="text-align: right;">
+        		<a href="<?= $button_aggiungi_query_string ?>" class="button-a" onclick="<?= $this->get_on_click() ?>">Add</a>
+        	</div>
     
-            <thead>
-            
-                <?php foreach($this->fields as $field): ?>
+            <table class="table">
+        
+                <thead>
                 
-                <th><?= $field[0] ?></th>
+                    <?php foreach($this->fields as $field): ?>
+                    
+                    <th><?= $field[0] ?></th>
+                    
+                    <?php endforeach; ?>
+                    
+                    <th></th>
+                    
+                    <th></th>
+                    
+                </thead>
+        
+                <tbody>
                 
-                <?php endforeach; ?>
-                
-                <th></th>
-                
-                <th></th>
-                
-            </thead>
-    
-            <tbody>
-            
-            	<?php foreach($rows as $row): ?>
-            	
-            	<?php 
-            	   $id = $row[$this->select_table . '_id'];
-            	?>
-            	
-            	<tr data-id="<?= $id ?>">
-            	
-                	<?php foreach($this->fields as $field): ?>
-                	<td><span><?= $field[0] ?></span><?= $row[$field[1]]?></td>
-                	<?php endforeach; ?>
+                	<?php foreach($rows as $row): ?>
                 	
-                	<?php $query_string_delete = $this->request->set_query_string_param($this->cleared_query_string($id), 'delete', '');
-                	$query_string_update = $this->request->set_query_string_param($this->cleared_query_string($id), 'popup', ''); ?>
+                	<?php 
+                	   $id = $row[$this->select_table . '_id'];
+                	?>
                 	
-                	<td class="table-action-section">
+                	<tr data-id="<?= $id ?>">
                 	
-                		<a href="<?= $application_host?><?= $this->application->script_name?><?= $query_string_update ?>" class="button-a" onclick="<?= $this->get_onclick_update($id) ?>">
-                			<img class="icon invert" src="<?= $img_edit ?>">
-                		</a>
-                		
-                		<a class="button-a" style="margin-left: 4px;" href="<?= $application_host?><?= $this->application->script_name?><?= $query_string_delete ?>">
-                			<img class="icon invert" src="<?= $img_delete ?>">
-                		</a>
-                	
-                    	<?php foreach($this->referencing as $table): ?>
-                    	<a class="link" href="<?= $application_host ?>/<?= $application_path ?>/<?= $table[1].php ?>?<?= $table[3] . "=$id&nest" ?>" style="margin-left: 4px;"><span class="circle" style="color: <?= $table[3] ?>><img class="invert icon" src="<?= $img_link ?>"></span> <?= $table[2] ?></a>
+                    	<?php foreach($this->fields as $field): ?>
+                    	<td><span><?= $field[0] ?></span><?= $row[$field[1]]?></td>
                     	<?php endforeach; ?>
+                    	
+                    	<?php $query_string_delete = $this->request->set_query_string_param($this->cleared_query_string($id), 'delete', '');
+                    	$query_string_update = $this->request->set_query_string_param($this->cleared_query_string($id), 'popup', ''); ?>
+                    	
+                    	<td class="table-action-section">
+                    	
+                    		<a class="button-a button-small" href="<?= $application_host?><?= $this->application->script_name?><?= $query_string_update ?>" onclick="<?= $this->get_onclick_update($id) ?>">
+                    			Edit
+                    		</a>
+                    		
+                    		<a class="button-a button-small" style="margin-left: 4px;" href="<?= $application_host?><?= $this->application->script_name?><?= $query_string_delete ?>">
+                    			Delete
+                    		</a>
+                    	
+                        	<?php foreach($this->referencing as $table): ?>
+                        	<a class="link" href="<?= $application_host ?>/<?= $application_path ?>/<?= $table[1].php ?>?<?= $table[3] . "=$id&nest" ?>" style="margin-left: 4px;"><span class="circle" style="color: <?= $table[3] ?>><img class="invert icon" src="<?= $img_link ?>"></span> <?= $table[2] ?></a>
+                        	<?php endforeach; ?>
+                    	
+                		</td>
+                    	
+                	</tr>	
                 	
-            		</td>
-                	
-            	</tr>	
-            	
-            	<?php endforeach; ?>
-            
-            
-            </tbody>
-    
-    	</table>
+                	<?php endforeach; ?>
+                
+                
+                </tbody>
+        
+        	</table>
+
+		</div>	
     
         <?php
         
@@ -329,8 +324,8 @@ class Table extends Relation {
         ?>
     
     	<div class="scrollable-buttons">
-        	<a class="button-a arrows" href="<?= $button_arrow_down_uri ?>" style="margin-top: 52px;"><img class="icon invert" src="<?= $img_arrow_down ?>"></a>
-        	<a class="button-a arrows" href="<?= $button_arrow_up_uri ?>"><img class="icon invert" src="<?= $img_arrow_up ?>"></a>
+        	<a class="button-pagination" href="<?= $button_arrow_down_uri ?>" style="margin-top: 132px;"><span class="chevron-arrow-up"></span></a>
+        	<a class="button-pagination" href="<?= $button_arrow_up_uri ?>"><span class="chevron-arrow-down"></span></a>
     	</div>  
     
     </div>

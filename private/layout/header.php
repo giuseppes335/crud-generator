@@ -28,18 +28,13 @@ $request = new Request($_GET, $_POST, $session, $application, $configuration);
 <meta description="Crud generator">
 <style>
 
-    @font-face {
-        font-family: Roboto;
-        src: url(css/fonts/roboto/Roboto-Regular.ttf);
-    }
-
     html, body {
         height: 100%;
     }
 
     body {
         margin: 0;
-        font-family: Roboto; 
+        font-family: Tahoma; 
         font-size: 18px;
     }
 

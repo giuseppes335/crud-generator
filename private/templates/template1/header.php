@@ -29,8 +29,7 @@ class Header extends Relation {
         }
         body {
             margin: 0;
-            font-family: Arial, sans-serif;
-            
+            font-family: Tahoma, sans-serif;
         }
         body * {
             box-sizing: border-box;
@@ -164,16 +163,55 @@ class Header extends Relation {
             }
         }
         .button-a {
-            background-color: #3f51b5;
+            background-color: #5b5b5b;
             color: #fff;
-            border: 1px solid #3f51b5;
-            display: inline-block;
-            height: 40px;
-            line-height: 40px;
-            padding: 0 20px;
+            border: 1px solid #5b5b5b;
+            width: 80px;
+            height: 80px;
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
             text-decoration: none;
+            border-radius: 100%;
+            text-align: center;
+            font-size: 12px;
             font-weight: bold;
         }
+        .button-small {
+            width: 50px;
+            height: 50px; 
+            font-size: 12px;
+            padding: 0;
+        }
+        /*
+            https://codepen.io/evabat/pen/Ymqoez
+        */
+        .chevron-arrow-down {
+            display: inline-block;
+            border-right: 3px solid #fff;
+            border-bottom: 3px solid #fff;
+            width: 10px; 
+            height: 10px;
+            transform: rotate(-315deg);
+        }
+        .chevron-arrow-up {
+            display: inline-block;
+            border-right: 3px solid #fff;
+            border-bottom: 3px solid #fff;
+            width: 10px; 
+            height: 10px;
+            transform: rotate(-135deg);
+        }
+        .button-pagination {
+            background-color: #5b5b5b;
+            border: 1px solid #5b5b5b;
+            height: 25px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-decoration: none;
+        }
+        /*
         .button-a:hover {
             background-color: #607d8b;
             color: #fff;
@@ -185,6 +223,7 @@ class Header extends Relation {
             color: #fff;
             border: 1px solid #3f51b5;
         }
+        */
         .button {
             background-color: #3f51b5;
             color: #fff;
@@ -192,7 +231,7 @@ class Header extends Relation {
             height: 40px;
             line-height: 40px;
             padding: 0 20px;
-            font-size: 16px;
+            font-size: 12px;
             font-weight: bold;
         }
         .button:hover {
@@ -382,6 +421,7 @@ class Header extends Relation {
         }
         .scrollable {
             display: flex;
+            flex-direction: row;
         }
         .scrollable-buttons {
             width: 24px;
