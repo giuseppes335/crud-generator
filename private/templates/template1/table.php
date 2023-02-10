@@ -321,7 +321,7 @@ EOT;
 
         $application_path = $this->application->path;
 
-        $img_close = "$application_host/$application_path/img/close_FILL0_wght700_GRAD0_opsz48.png";
+        //$img_close = "$application_host/$application_path/img/close_FILL0_wght700_GRAD0_opsz48.png";
 
         $button_close_popup_query_string = $this->request->delete_query_string_param($this->request->query_string, 'delete');
         $button_close_popup_query_string = $this->request->update_query_string_param($button_close_popup_query_string, 'unnest', 'nest', '');
@@ -332,7 +332,7 @@ EOT;
         <div id="overlay">
         <div id="popup">
         <div style="text-align: right;">
-        <a href="$button_close_popup_query_string" class="close-button"><img src="$img_close" alt=""></a>
+        <a href="$button_close_popup_query_string" class="close-button">x</a>
         </div>
         <div id="popup-content">
 EOT;
@@ -680,8 +680,8 @@ EOT;
         echo <<<EOT
         </table>
         <div class="scrollable-buttons">
-        <a class="button-a arrows" href="$button_arrow_down_uri" style="margin-top: 52px;"><img class="icon invert" src="$img_arrow_down"></a>
-        <a class="button-a arrows" href="$button_arrow_up_uri"><img class="icon invert" src="$img_arrow_up"></a>
+        <a class="button-a arrows" href="$button_arrow_down_uri" style="margin-top: 52px;">up</a>
+        <a class="button-a arrows" href="$button_arrow_up_uri">dw</a>
         </div>  
         </div>
         </div>
