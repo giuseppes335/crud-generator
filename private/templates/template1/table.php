@@ -132,12 +132,6 @@ class Table extends Relation {
     // Print popup form
     function print_popup_form() {
         
-        $application_host = $this->application->host;
-
-        $application_path = $this->application->path;
-
-        $img_close = "$application_host/$application_path/img/close_FILL0_wght700_GRAD0_opsz48.png";
-
         $button_close_popup_query_string = $this->request->delete_query_string_param($this->request->query_string, 'delete');
         $button_close_popup_query_string = $this->request->update_query_string_param($button_close_popup_query_string, 'unnest', 'nest', '');
         $button_close_popup_query_string = $this->request->delete_query_string_param($button_close_popup_query_string, 'id');
@@ -148,7 +142,7 @@ class Table extends Relation {
 <div id="overlay">
     <div id="popup">
         <div style="text-align: right;">
-        	<a href="<?= $button_close_popup_query_string ?>" class="close-button"><img src="<?= $img_close ?>" alt=""></a>
+        	<a href="<?= $button_close_popup_query_string ?>" class="close-button">x</a>
         </div>
         <div id="popup-content">
         

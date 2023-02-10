@@ -25,7 +25,7 @@ class Request {
 
             $this->application->mysqli->query($this->configuration->create_demos_table_query);
 
-            $this->application->mysqli->query($this->configuration->create_components_table_query);
+            //$this->application->mysqli->query($this->configuration->create_components_table_query);
         
         }
 
