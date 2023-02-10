@@ -2,3 +2,5 @@
 .buildpath
 .project
 private/demos
+composer.lock
+vendor
