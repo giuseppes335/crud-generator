@@ -281,21 +281,21 @@ class Application extends Relation {
     }
 
     function select($table, $joins = [], $filters = [], $selects = [], $where_like = false, $offset = 0, $creators = [], $limit = 1000) {
- 
+        
         $query = "select * from $table";
-
+        
         if (count($selects) > 0) {
-
+            
             $select_part = implode(', ', $selects);
-
+            
             $query = "select $select_part from $table";
-
+            
         }
-
+        
         foreach($joins as $join) {
-
+            
             $query .= " $join";
-
+            
         }
         
         if (count($selects) > 0) {
@@ -303,52 +303,99 @@ class Application extends Relation {
             $query = "select * from ($query) as t";
             
         }
-
+        
+        
+        $formats = '';
+        
+        $values = [];
+        
         $wheres = [];
-
-        foreach($filters as $field => $value) {
-
-            array_push($wheres, "$value");
+        
+        
+        
+        foreach($filters as $field => $ov) {
+            
+            $formats .= 's';
+            
+            $value = $ov['value'];
+            
+            array_push($values, $value);
+            
+            if ($ov['op'] === 'eq') {
+                
+                $operator = '=';
+                
+            } else if ($ov['op'] === 'like') {
+                
+                $operator = 'like';
+                
+            } else if ($ov['op'] === 'lt') {
+                
+                $operator = '<';
+                
+            } else if ($ov['op'] === 'gt') {
+                
+                $operator = '>';
+                
+            } else if ($ov['op'] === 'let') {
+                
+                $operator = '<=';
+                
+            } else if ($ov['op'] === 'get') {
+                
+                $operator = '>=';
+                
+            }
+            
+            $query_part = "$field $operator ?";
+            
+            array_push($wheres, $query_part);
             
         }
-
+        
         $where_conditions = implode(' and ', $wheres);
-
+        
         if (count($wheres) > 0) {
-
+            
             $query .= " where $where_conditions";
-
+            
         } else {
-
+            
             $query .= " where 1";
-
+            
         }
-
+        
         if (count($creators) > 0) {
-
+            
             $cr_ids = implode(', ', $creators);
-
+            
             $query .= " and $table" . "_creator " . "in ($cr_ids)";
-
+            
         }
-
+        
         $query .= " order by $table" . "_id";
-
+        
         $query .= " limit $offset, $limit";
-
+        
         $stmt = $this->mysqli->prepare($query);
         
+        if (count($wheres) > 0) {
+            
+            $stmt->bind_param($formats, ...array_values($values));
+            
+        }
+        
         $stmt->execute();
-
+        
         $result = $stmt->get_result();
-
+        
         $rows = [];
         while ($row = $result->fetch_assoc()) {
             array_push($rows, $row);
         }
-
+        
         return $rows;
-
+        
     }
 
 

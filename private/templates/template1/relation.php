@@ -24,74 +24,24 @@ abstract class Relation {
 
     public function get_query_param_part($field, $param) {
         
-        $value = $param[0];
-
-        $operator = $param[1];
-
-        $param_part = '';
-
-        if ($operator === 'eq') {
-
-            $param_part = " $field = '$value'";
+        $param_part = [];
         
-        } else if ($operator === 'lt') {
-
-            $param_part =  " $field < '$value'";
-
-        } else if ($operator === 'gt') {
-
-            $param_part =  " $field > '$value'";
-
-        } else if ($operator === 'let') {
-
-            $param_part =  " $field <= '$value'";
-
-        } else if ($operator === 'get') {
+        $index = 0;
+        
+        while(isset($param[$index]) && isset($param[$index + 1])) {
             
-            $param_part =  " $field >= '$value'";
-
-        } else if ($operator === 'like') {
             
-            $param_part =  " $field like '%$value%'";
-
-        }
-
-        if (isset($param[2]) && isset($param[3])) {
-
-            $value = $param[2];
-
-            $operator = $param[3];
-
-            if ($operator === 'eq') {
-
-                $param_part .= " and $field = '$value'";
+            $param_part = [
+                'op' => $param[$index + 1],
+                'value' => $param[$index]
+            ];
             
-            } else if ($operator === 'lt') {
-
-                $param_part .=  " and $field < '$value'";
-
-            } else if ($operator === 'gt') {
-
-                $param_part .=  " and $field > '$value'";
-
-            } else if ($operator === 'let') {
-
-                $param_part .=  " and $field <= '$value'";
-
-            } else if ($operator === 'get') {
-                
-                $param_part .=  " and $field >= '$value'";
-
-            } else if ($operator === 'like') {
-                
-                $param_part .=  " and $field like '%$value%'";
-
-            }
-
+            $index++;
+            
         }
         
         return $param_part;
-
+        
     }
 
 
