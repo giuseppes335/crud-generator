@@ -304,11 +304,52 @@ class Application extends Relation {
             
         }
 
+        
+        $formats = '';
+        
+        $values = [];
+        
         $wheres = [];
 
-        foreach($filters as $field => $value) {
+
+        
+        foreach($filters as $field => $ov) {
             
-            array_push($wheres, "$value");
+            $formats .= 's';
+            
+            $value = $ov['value'];
+            
+            array_push($values, $value);
+      
+            if ($ov['op'] === 'eq') {
+                
+                $operator = '=';
+                
+            } else if ($ov['op'] === 'like') {
+                
+                $operator = 'like';
+                
+            } else if ($ov['op'] === 'lt') {
+                
+                $operator = '<';
+                
+            } else if ($ov['op'] === 'gt') {
+                
+                $operator = '>';
+                
+            } else if ($ov['op'] === 'let') {
+                
+                $operator = '<=';
+                
+            } else if ($ov['op'] === 'get') {
+                
+                $operator = '>=';
+                
+            }
+            
+            $query_part = "$field $operator ?";
+            
+            array_push($wheres, $query_part);
             
         }
 
@@ -337,6 +378,12 @@ class Application extends Relation {
         $query .= " limit $offset, $limit";
 
         $stmt = $this->mysqli->prepare($query);
+        
+        if (count($wheres) > 0) {
+        
+            $stmt->bind_param($formats, ...array_values($values));
+            
+        }
         
         $stmt->execute();
 
