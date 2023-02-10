@@ -1,4 +1,15 @@
-# crud-generator
+# Crud generator
+
+
+Edit private/templates/template1/application.php with correct credentials
+<pre>
+$this->mysqli = new mysqli(
+    '127.0.0.1', 
+    $database_username, 
+    $database_password,
+    'demos'
+);
+</pre>
 
 Launch local mysql database and create schema
 <pre>
@@ -12,25 +23,10 @@ php -S 127.0.0.1:8000
 
 Open browser at
 <pre>
-http://127.0.0.1:8000/demo.php?migrate
+http://127.0.0.1:8000?migrate
 </pre>
 
 Run sql query
 <pre>
 INSERT INTO templates (name, path) VALUES ('Template 1', 'private/templates/template1');
-</pre>
-
-Edit private/templates/template1/application.php as follows
-<pre>
-$this->mysqli = new mysqli(
-    '127.0.0.1', 
-    'root', 
-    '',
-    'demos'
-);
-</pre>
-
-Open browser and run Preview
-<pre>
-http://127.0.0.1:8000
 </pre>

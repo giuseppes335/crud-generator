@@ -22,9 +22,25 @@ $template = $application->get_template($template_id);
 
 $demo_name = $_POST['name'];
 
-$demo_id = $application->insert_demo($demo_name, $template['default_schema'], $session_id, $template_id);
-
 $simple_schema = $_POST['schema'];
+
+$demo_id = '';
+
+if (isset($_GET['demo_id']) && $_GET['demo_id']) {
+    
+    $demo_id = $_GET['demo_id'];
+    
+    $application->update_demo($demo_name, '', $simple_schema, $demo_id, $template_id);
+    
+} else {
+    
+    $demo_id = $application->insert_demo($demo_name, $simple_schema, $session_id, $template_id);
+    
+}
+
+
+
+
 
 $custom_schema = new CustomSchema($simple_schema);
 

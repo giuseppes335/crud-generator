@@ -1,19 +1,49 @@
 <?php require_once 'private/layout/header.php'; ?>
 
+<?php 
+
+$name = '';
+
+$template_id = '';
+
+$schema = '';
+
+$demo_id = '';
+
+if (isset($_GET['demo_id']) && $_GET['demo_id']) {
+
+    $demo = $application->get_demo($_GET['demo_id']);
+    
+    if ($demo) {
+        
+        $name = $demo['name'];
+        
+        $template_id = $demo['template_id'];
+        
+        $schema = $demo['schema0'];
+        
+        $demo_id = $_GET['demo_id'];
+        
+    }
+    
+}
+
+?>
+
 <section class="primary-font-color">
 
     <h1 style="font-size: 32px;">New application</h1>
     
-    <form action="preview.php?debug&reset" method="post">
+    <form action="preview.php?demo_id=<?= $demo_id ?>&debug=&reset=" method="post">
     
         <div class="form-item" style="margin-top: 8px;">
             <label for="name">Name</label>
-            <input type="text" id="name" name="name">
+            <input type="text" id="name" name="name" value="<?= $name ?>">
         </div>
 
         <div class="form-item" style="margin-top: 8px;">
             <label for="template-id">Template</label>
-            <select id="template-id" name="template_id">
+            <select id="template-id" name="template_id" value="<?= $template_id ?>">
        			<?php foreach($application->get_templates() as $template) : ?>
        			<option value="<?= $template['id']; ?>"><?= $template['name']; ?></option>
        			<?php endforeach; ?>
@@ -58,7 +88,7 @@ EOT;
 ?>		
         <div class="form-item" style="margin-top: 8px;">
             <label for="schema">Yaml schema</label>
-            <textarea id="schema" name="schema" style="height: 300px;"><?= $default_schema ?></textarea>
+            <textarea id="schema" name="schema" style="height: 300px;"><?= $schema?$schema:$default_schema ?></textarea>
         </div>
         
         <div class="form-item" style="margin-top: 8px; overflow: auto;">
