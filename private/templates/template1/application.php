@@ -297,6 +297,12 @@ class Application extends Relation {
             $query .= " $join";
 
         }
+        
+        if (count($selects) > 0) {
+            
+            $query = "select * from ($query) as t";
+            
+        }
 
         $wheres = [];
 
