@@ -230,7 +230,7 @@ class Table extends Relation {
     	<div style="flex-grow: 1;">
     	
     		<div style="text-align: right;">
-        		<a href="<?= $button_aggiungi_query_string ?>" class="button-a" onclick="<?= $this->get_on_click() ?>">Add</a>
+        		<a href="<?= $button_aggiungi_query_string ?>" class="button-a" onclick="<?= $this->get_on_click() ?>">Create</a>
         	</div>
     
             <table class="table">
@@ -269,7 +269,7 @@ class Table extends Relation {
                     	<td class="table-action-section">
                     	
                     		<a class="button-a button-small" href="<?= $application_host?><?= $this->application->script_name?><?= $query_string_update ?>" onclick="<?= $this->get_onclick_update($id) ?>">
-                    			Edit
+                    			Update
                     		</a>
                     		
                     		<a class="button-a button-small" style="margin-left: 4px;" href="<?= $application_host?><?= $this->application->script_name?><?= $query_string_delete ?>">

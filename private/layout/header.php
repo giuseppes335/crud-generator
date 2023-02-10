@@ -506,9 +506,9 @@ $request = new Request($_GET, $_POST, $session, $application, $configuration);
                     <a id="close-button" class="invert" onclick="closeSidebar()"><img src="<?= $configuration->host; ?>/img/close_FILL0_wght700_GRAD0_opsz48.png" alt=""></a>
                 </div>
                 <ul style="color: #fff;">
-                    <li><a href="scegli-un-applicazione.php">Scegli un'applicazione</a></li>
+                    <li><a href="index.php">New application</a></li>
                     <?php if ($demos): ?>
-                    <li><a href="<?= $configuration->host; ?>/demo.php""><?= $demos[0]['name']; ?></a></li>
+                    <li><a href="index.php?demo_id=<?= $demos[0]['id']; ?>"><?= $demos[0]['name']; ?></a></li>
                     <?php endif; ?>
                     <li style="padding: 8px 32px;"><hr style="border: none; border-bottom: 1px solid #fff;"></li>
                     <li><a href="<?= $configuration->host; ?>">Esci</a></li>
