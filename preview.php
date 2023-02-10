@@ -2,7 +2,6 @@
 
 require_once 'private/be/global_import.php';
 require_once 'private/include/custom-schema.php';
-require_once "spyc/Spyc.php";
 
 function del_tree($dir) {
     $files = array_diff(scandir($dir), array('.','..'));

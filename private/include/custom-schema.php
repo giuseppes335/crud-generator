@@ -1,7 +1,5 @@
 <?php
 
-require_once "spyc/Spyc.php";
-
 class CustomSchema {
     
     function __construct(String $simple_schema) {
