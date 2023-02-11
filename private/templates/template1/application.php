@@ -4,7 +4,7 @@ require_once 'relation.php';
 
 class Application extends Relation {
 
-    function __construct() {
+    function __construct(Array $params) {
         
         $server_protocol = 'http';
         
@@ -80,10 +80,10 @@ class Application extends Relation {
         mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
         $this->mysqli = new mysqli(
-            '127.0.0.1', 
-            'root', 
-            '',
-            'demos'
+            $params['database_host'], 
+            $params['database_username'], 
+            $params['database_password'],
+            $params['database_name']
         );
 
     }
@@ -127,8 +127,8 @@ class Application extends Relation {
             array_push($table_definitions, "$field->name $field->mysql_type $field->nullable");
 
             if (isset($field->dataset_table)) {
-
-                $now = time() . "$index";
+                 
+                $now = str_replace('-', '_', $index);
 
                 array_push($fks_definitions, "constraint fk_$now" . "_$table" . "_to_$field->dataset_table foreign key($field->name) references $field->dataset_table($field->dataset_id) on delete cascade");
 
@@ -144,7 +144,7 @@ class Application extends Relation {
         }
         
         $query = "create table if not exists $table ($table" . "_id bigint unsigned auto_increment primary key, " . implode(', ', $table_definitions) .", " . $table . "_creator bigint unsigned null, " . $table . "_created_at timestamp default CURRENT_TIMESTAMP, " . $table . "_updated_at timestamp default CURRENT_TIMESTAMP $fks);";
-        //echo "$query<br><br>";
+        echo "$query<br><br>";
         $this->mysqli->query($query);
 
     }
@@ -281,21 +281,21 @@ class Application extends Relation {
     }
 
     function select($table, $joins = [], $filters = [], $selects = [], $where_like = false, $offset = 0, $creators = [], $limit = 1000) {
-        
+ 
         $query = "select * from $table";
-        
+
         if (count($selects) > 0) {
-            
+
             $select_part = implode(', ', $selects);
-            
+
             $query = "select $select_part from $table";
-            
+
         }
-        
+
         foreach($joins as $join) {
-            
+
             $query .= " $join";
-            
+
         }
         
         if (count($selects) > 0) {
@@ -303,15 +303,15 @@ class Application extends Relation {
             $query = "select * from ($query) as t";
             
         }
-        
+
         
         $formats = '';
         
         $values = [];
         
         $wheres = [];
-        
-        
+
+
         
         foreach($filters as $field => $ov) {
             
@@ -320,7 +320,7 @@ class Application extends Relation {
             $value = $ov['value'];
             
             array_push($values, $value);
-            
+      
             if ($ov['op'] === 'eq') {
                 
                 $operator = '=';
@@ -352,50 +352,50 @@ class Application extends Relation {
             array_push($wheres, $query_part);
             
         }
-        
+
         $where_conditions = implode(' and ', $wheres);
-        
+
         if (count($wheres) > 0) {
-            
+
             $query .= " where $where_conditions";
-            
+
         } else {
-            
+
             $query .= " where 1";
-            
+
         }
-        
+
         if (count($creators) > 0) {
-            
+
             $cr_ids = implode(', ', $creators);
-            
+
             $query .= " and $table" . "_creator " . "in ($cr_ids)";
-            
+
         }
-        
+
         $query .= " order by $table" . "_id";
-        
+
         $query .= " limit $offset, $limit";
-        
+
         $stmt = $this->mysqli->prepare($query);
         
         if (count($wheres) > 0) {
-            
+        
             $stmt->bind_param($formats, ...array_values($values));
             
         }
         
         $stmt->execute();
-        
+
         $result = $stmt->get_result();
-        
+
         $rows = [];
         while ($row = $result->fetch_assoc()) {
             array_push($rows, $row);
         }
-        
+
         return $rows;
-        
+
     }
 
 
