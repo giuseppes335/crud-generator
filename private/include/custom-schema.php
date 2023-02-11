@@ -2,13 +2,23 @@
 
 class CustomSchema {
     
-    function __construct(String $simple_schema) {
+    function __construct(String $simple_schema, Array $params) {
         
         $this->simple_schema = $simple_schema;
+        
+        $this->params = $params;
         
     }
     
     function get() {
+        
+        $database_host = $this->params['database_host'];
+        
+        $database_username = $this->params['database_username'];
+        
+        $database_password = $this->params['database_password'];
+        
+        $database_name = $this->params['database_name'];
         
         $schema_object = spyc_load($this->simple_schema);
         
@@ -48,6 +58,11 @@ components:
   application: &application
     name: application
     component: application.php
+    params:
+      database_host: $database_host
+      database_username: $database_username 
+      database_password: $database_password
+      database_name: $database_name
 </pre>
 EOT;
         

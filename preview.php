@@ -25,15 +25,27 @@ $simple_schema = $_POST['schema'];
 
 $demo_id = '';
 
+$params = [];
+
+$paramsa['database_host'] = $_POST['database_host'];
+
+$paramsa['database_username'] = $_POST['database_username'];
+
+$paramsa['database_password'] = $_POST['database_password'];
+
+$paramsa['database_name'] = $_POST['database_name'];
+
+$params = json_encode($paramsa);
+
 if (isset($_GET['demo_id']) && $_GET['demo_id']) {
     
     $demo_id = $_GET['demo_id'];
     
-    $application->update_demo($demo_name, '', $simple_schema, $demo_id, $template_id);
+    $application->update_demo($demo_name, $params, $simple_schema, $demo_id, $template_id);
     
 } else {
     
-    $demo_id = $application->insert_demo($demo_name, $simple_schema, $session_id, $template_id);
+    $demo_id = $application->insert_demo($demo_name, $params, $simple_schema, $session_id, $template_id);
     
 }
 
@@ -41,7 +53,7 @@ if (isset($_GET['demo_id']) && $_GET['demo_id']) {
 
 
 
-$custom_schema = new CustomSchema($simple_schema);
+$custom_schema = new CustomSchema($simple_schema, $paramsa);
 
 $schema = spyc_load($custom_schema->get());
 

@@ -119,7 +119,7 @@ EOT;
         echo <<<EOT
         <hr>
         <li>
-        <a href="$application_host/$application_path/login.php?logout">Esci</a>
+        <a href="/index.php">Esci</a>
         </li>
         </ul>
 EOT;

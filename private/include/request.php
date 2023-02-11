@@ -24,6 +24,10 @@ class Request {
             $this->application->mysqli->query($this->configuration->create_templates_table_query);
 
             $this->application->mysqli->query($this->configuration->create_demos_table_query);
+            
+            $query0 = "INSERT INTO templates (name, path) VALUES ('Template 1', 'private/templates/template1');";
+            
+            $this->application->mysqli->query($query0);
 
             //$this->application->mysqli->query($this->configuration->create_components_table_query);
         

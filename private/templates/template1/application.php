@@ -4,7 +4,7 @@ require_once 'relation.php';
 
 class Application extends Relation {
 
-    function __construct() {
+    function __construct(Array $params) {
         
         $server_protocol = 'http';
         
@@ -80,10 +80,10 @@ class Application extends Relation {
         mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
         $this->mysqli = new mysqli(
-            '127.0.0.1', 
-            'root', 
-            '',
-            'demos'
+            $params['database_host'], 
+            $params['database_username'], 
+            $params['database_password'],
+            $params['database_name']
         );
 
     }
