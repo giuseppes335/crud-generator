@@ -226,13 +226,13 @@ class Application {
 
     }
 
-    function insert_demo($name, $schema, $session_id, $template_id) {
+    function insert_demo($name, $params, $schema, $session_id, $template_id) {
 
         $stmt = $this->mysqli->prepare($this->configuration->insert_demo_query);
 
         $date = date('Y-m-d H:i:s');
 
-        $stmt->bind_param('sssssi', $name, $schema, $date, $date, $session_id, $template_id); 
+        $stmt->bind_param('ssssssi', $name, $params, $schema, $date, $date, $session_id, $template_id); 
 
         $stmt->execute();
 

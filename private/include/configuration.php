@@ -125,9 +125,9 @@ class Configuration {
         $this->get_template_query = "select * from templates where id = ?";
 
         // Demos
-        $this->create_demos_table_query = "create table if not exists demos (id bigint unsigned auto_increment primary key, name varchar(255) null unique, params text null, schema0 text null, created_at timestamp default CURRENT_TIMESTAMP, updated_at timestamp default CURRENT_TIMESTAMP, session_id varchar(255), template_id bigint unsigned, constraint fk_demo_to_template foreign key(template_id) references templates(id))";
+        $this->create_demos_table_query = "create table if not exists demos (id bigint unsigned auto_increment primary key, name varchar(255) null unique, params json null, schema0 text null, created_at timestamp default CURRENT_TIMESTAMP, updated_at timestamp default CURRENT_TIMESTAMP, session_id varchar(255), template_id bigint unsigned, constraint fk_demo_to_template foreign key(template_id) references templates(id))";
 
-        $this->insert_demo_query = "insert into demos(name, schema0, created_at, updated_at, session_id, template_id) values(?, ?, ?, ?, ?, ?)";
+        $this->insert_demo_query = "insert into demos(name, params, schema0, created_at, updated_at, session_id, template_id) values(?, ?, ?, ?, ?, ?, ?)";
 
         $this->update_demo_query = "update demos set name = ?, params = ?, schema0 = ?, updated_at = ? where id = ?";
 
