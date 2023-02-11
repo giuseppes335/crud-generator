@@ -1,8 +1,12 @@
 # Crud generator
 
-You must have installed a Php/Mysql Stack
+Requirements: Php 7.1.3 - Mysql 5.7
 
-For installation run <pre>composer install</pre> and update <pre>private/include/configuration.php</pre> for database connection
+Install via composer
 
-To start run a local php server <pre>php -S 127.0.0.1:8000</pre> and open browser at <pre>http://127.0.0.1:8000?migrate</pre>
+Configure database connection at private/include/configuration.php and start Mysql on port 3306
+
+Start a local built-in server php -S 127.0.0.1:8000 
+
+Navigate at http://127.0.0.1:8000?migrate
 
