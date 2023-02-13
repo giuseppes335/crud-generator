@@ -76,7 +76,15 @@ class Application extends Relation {
 
         $this->script_name = $script_name;
 
-        $this->db = new SQLite3('./database/' . $params['database_name'] . '.dbi');
+
+        mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+
+        $this->mysqli = new mysqli(
+            $params['database_host'], 
+            $params['database_username'], 
+            $params['database_password'],
+            $params['database_name']
+        );
 
     }
 
@@ -100,7 +108,7 @@ class Application extends Relation {
 
         $query = "drop table if exists $table";
 
-        $this->db->query($query);
+        $this->mysqli->query($query);
 
     }
 
@@ -135,9 +143,9 @@ class Application extends Relation {
 
         }
         
-        $query = "create table if not exists $table ($table" . "_id integer primary key autoincrement, " . implode(', ', $table_definitions) .", " . $table . "_creator integer null, " . $table . "_created_at timestamp, " . $table . "_updated_at timestamp $fks);";
+        $query = "create table if not exists $table ($table" . "_id bigint unsigned auto_increment primary key, " . implode(', ', $table_definitions) .", " . $table . "_creator bigint unsigned null, " . $table . "_created_at timestamp default CURRENT_TIMESTAMP, " . $table . "_updated_at timestamp default CURRENT_TIMESTAMP $fks);";
         echo "$query<br><br>";
-        $this->db->query($query);
+        $this->mysqli->query($query);
 
     }
 
@@ -150,46 +158,18 @@ class Application extends Relation {
         $fields[$table . '_created_at'] = $date;
 
         $fields[$table . '_updated_at'] = $date;
-        
-        $formats .= 'iss';
 
         $keys = array_keys($fields);
-         
+        
         $query = "insert into $table (" . implode(', ', $keys) . ") values (" . implode(', ', array_fill(0, count($keys), '?')) . ");";
 
-        $stmt = $this->db->prepare($query);
+        $stmt = $this->mysqli->prepare($query);
 
-        foreach (array_values($fields) as $index => $field) {
-  
-            $format = substr($formats, $index, 1);
-
-            if ('s' === $format) {
-                
-                $stmt->bindValue($index + 1, $field, SQLITE3_TEXT); 
-                
-            } else if ('i' === $format) {
-                
-                $stmt->bindValue($index + 1, $field, SQLITE3_INTEGER); 
-                
-            } else if ('d' === $format) {
-                
-                $stmt->bindValue($index + 1, $field, SQLITE3_FLOAT);
-                
-            } else if ('b' === $format) {
-                
-                $stmt->bindValue($index + 1, $field, SQLITE3_BLOB);
-                
-            } else {
-                
-                $stmt->bindValue($index + 1, $field, SQLITE3_NULL);
-                
-            }
-            
-        }
+        $stmt->bind_param($formats . 'iss', ...array_values($fields)); 
 
         $stmt->execute();
 
-        return $this->db->lastInsertRowID();
+        return $this->mysqli->insert_id;
 
     }
 
@@ -209,45 +189,96 @@ class Application extends Relation {
 
         $query = "update $table set " . implode(', ', $update_statements) . " where $table" . "_id = $id";
 
-        $stmt = $this->db->prepare($query);
+        $stmt = $this->mysqli->prepare($query);
 
-        $index = 1;
-        
-        foreach (array_values($fields) as $index => $field) {
-            
-            $format = substr($formats, $index, 1);
-            
-            if ('s' === $format) {
-                
-                $stmt->bindValue($index + 1, $field, SQLITE3_TEXT);
-                
-            } else if ('i' === $format) {
-                
-                $stmt->bindValue($index + 1, $field, SQLITE3_INTEGER);
-                
-            } else if ('d' === $format) {
-                
-                $stmt->bindValue($index + 1, $field, SQLITE3_FLOAT);
-                
-            } else if ('b' === $format) {
-                
-                $stmt->bindValue($index + 1, $field, SQLITE3_BLOB);
-                
-            } else {
-                
-                $stmt->bindValue($index + 1, $field, SQLITE3_NULL);
-                
-            }
-            
-        }
+        $stmt->bind_param($formats . 's', ...array_values($fields)); 
 
         $stmt->execute(); 
 
     }
 
+    function table_exists($table) {
+
+        $query = "select * from information_schema.tables where table_schema = '$this->database' and table_name ='$table' limit 1";
+
+        $stmt = $this->mysqli->prepare($query);
+
+        $stmt->execute();
+
+        $result = $stmt->get_result();
+
+        $row = $result->fetch_assoc();
+
+        return $row;
+
+    }
     
 
+    function similar($columns, $table, $joins = [], $filters = [], $where_like = false) {
 
+        
+
+        $query = "select * from $table";
+
+        foreach($joins as $join) {
+
+            $query .= " $join";
+
+        }
+
+        $select_part = implode(', ', $columns);
+
+        $query .= " where ($select_part) in (select $select_part from $table";
+
+        foreach($joins as $join) {
+
+            $query .= " $join";
+
+        }
+
+        $wheres = [];
+
+        foreach($filters as $field => $value) {
+
+            if ($where_like) {
+
+                array_push($wheres, "$field like '%$value%'");
+
+            } else {
+
+                array_push($wheres, "$field = '$value'");
+
+            }
+            
+
+        }
+
+        $where_conditions = implode(' and ', $wheres);
+
+        if (count($wheres) > 0) {
+
+            $query .= " where $where_conditions";
+
+        }
+
+        $query .= ')';
+
+        $query .= " order by $table" . "_id";
+
+        $stmt = $this->mysqli->prepare($query);
+
+        $stmt->execute();
+
+        $result = $stmt->get_result();
+
+        $rows = [];
+        while ($row = $result->fetch_assoc()) {
+            array_push($rows, $row);
+        }
+
+        return $rows;
+
+    }
 
     function select($table, $joins = [], $filters = [], $selects = [], $where_like = false, $offset = 0, $creators = [], $limit = 1000) {
  
@@ -346,44 +377,20 @@ class Application extends Relation {
 
         $query .= " limit $offset, $limit";
 
-        $stmt = $this->db->prepare($query);
+        $stmt = $this->mysqli->prepare($query);
         
         if (count($wheres) > 0) {
-            
-            foreach (array_values($fields) as $index => $field) {
-                
-                $format = substr($formats, $index, 1);
-                
-                if ('s' === $format) {
-                    
-                    $stmt->bindValue($index + 1, $field, SQLITE3_TEXT);
-                    
-                } else if ('i' === $format) {
-                    
-                    $stmt->bindValue($index + 1, $field, SQLITE3_INTEGER);
-                    
-                } else if ('d' === $format) {
-                    
-                    $stmt->bindValue($index + 1, $field, SQLITE3_FLOAT);
-                    
-                } else if ('b' === $format) {
-                    
-                    $stmt->bindValue($index + 1, $field, SQLITE3_BLOB);
-                    
-                } else {
-                    
-                    $stmt->bindValue($index + 1, $field, SQLITE3_NULL);
-                    
-                }
-                
-            }
+        
+            $stmt->bind_param($formats, ...array_values($values));
             
         }
         
-        $result = $stmt->execute();
+        $stmt->execute();
+
+        $result = $stmt->get_result();
 
         $rows = [];
-        while ($row = $result->fetchArray(SQLITE3_ASSOC)) {
+        while ($row = $result->fetch_assoc()) {
             array_push($rows, $row);
         }
 
@@ -396,13 +403,15 @@ class Application extends Relation {
 
         $query = "select * from $table where $table" . "_id = ?";
 
-        $stmt = $this->db->prepare($query);
+        $stmt = $this->mysqli->prepare($query);
 
-        $stmt->bindParam(1, $id, SQLITE3_INTEGER); 
+        $stmt->bind_param('i', $id); 
 
-        $result = $stmt->execute();
+        $stmt->execute();
 
-        $row = $result->fetchArray(SQLITE3_ASSOC);
+        $result = $stmt->get_result();
+
+        $row = $result->fetch_assoc();
 
         return $row;
 
@@ -412,20 +421,47 @@ class Application extends Relation {
 
         $query = "delete from $table where $table" . "_id = ?";
 
-        $stmt = $this->db->prepare($query);
+        $stmt = $this->mysqli->prepare($query);
 
-        $stmt->bindParam(1, $id, SQLITE3_INTEGER); 
+        $stmt->bind_param('i', $id); 
 
         $stmt->execute();
 
     }
 
+    function delete_where($table, $filters) {
+
+        $query = "delete from $table";
+
+        $wheres = [];
+
+        foreach($filters as $field => $value) {
+
+            array_push($wheres, "$field = '$value'");
+
+        }
+
+        $where_conditions = implode(' and ', $wheres);
+
+        if (count($wheres) > 0) {
+
+            $query .= " where $where_conditions";
+
+        }
+
+        $stmt = $this->mysqli->prepare($query);
+
+        $stmt->bind_param('i', $id); 
+
+        $stmt->execute();
+
+    }
 
     function referenced_tables($table) {
 
         $query = "select table_name, referenced_table_name from information_schema.key_column_usage where referenced_table_schema is not null and table_schema = 'versioni-demo' and referenced_table_name = ?";
 
-        $stmt = $this->db->prepare($query);
+        $stmt = $this->mysqli->prepare($query);
 
         $stmt->bind_param('s', $table); 
 
@@ -445,5 +481,26 @@ class Application extends Relation {
 
     }
 
+    function login($users_table, $username_field, $password_field, $username_value, $password_value) {
+
+        $stmt = $this->mysqli->prepare("select * from $users_table where $username_field = ?");
+
+        $stmt->bind_param('s', $username_value); 
+    
+        $stmt->execute();
+    
+        $result = $stmt->get_result();
+    
+        $row = $result->fetch_assoc();
+    
+        $id = null;
+
+        if ($row && password_verify($password_value, $row[$password_field])) {
+            $id = $row["$users_table" . "_id"];
+        }
+    
+        return $id;
+
+    }
     
 }

@@ -4,3 +4,4 @@
 private/demos
 composer.lock
 vendor
+demos.dbi

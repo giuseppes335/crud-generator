@@ -7,10 +7,10 @@ session_start([
 
 require __DIR__ . '/../../vendor/autoload.php';
 
-require_once 'private/include/configuration.php';
-require_once 'private/include/request.php';
+require_once 'private/include/sqlite-configuration.php';
+require_once 'private/include/sqlite-request.php';
 require_once 'private/include/session.php';
-require_once 'private/include/application.php';
+require_once 'private/include/sqlite-application.php';
 
 $configuration = new Configuration();
 $session = new Session();

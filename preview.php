@@ -65,6 +65,10 @@ mkdir('private/demos/' . $demo_id . '/include', 0755, true);
 
 mkdir('private/demos/' . $demo_id . '/img', 0755, true);
 
+mkdir('private/demos/' . $demo_id . '/database', 0755, true);
+
+touch('private/demos/' . $demo_id . '/database/demos.dbi');
+
 
 /*
 if (!isset($request->get['debug'])) {

@@ -59,7 +59,8 @@ if (isset($_GET['demo_id']) && $_GET['demo_id']) {
             <label for="name">Name</label>
             <input type="text" id="name" name="name" value="<?= $name ?>">
         </div>
-        
+       	
+       	<!--
         <div class="form-item" style="margin-top: 8px;">
             <label for="database-host">Database host</label>
             <input type="text" id="database-host" name="database_host" value="<?= $database_host ?>">
@@ -74,6 +75,7 @@ if (isset($_GET['demo_id']) && $_GET['demo_id']) {
             <label for="database-password">Database password</label>
             <input type="text" id="database-password" name="database_password" value="<?= $database_password ?>">
         </div>
+        -->
         
         <div class="form-item" style="margin-top: 8px;">
             <label for="database-name">Database name</label>
