@@ -94,7 +94,7 @@ if (!isset($request->get['debug'])) {
     }
 
 }
-*/
+
 
 $images = scandir($_SERVER['DOCUMENT_ROOT']. '/img');
 
@@ -113,6 +113,7 @@ foreach($images as $file) {
     chmod($destination, 0755);
 
 }
+*/
 
 
 

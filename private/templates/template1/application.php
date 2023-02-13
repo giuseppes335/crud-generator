@@ -38,8 +38,9 @@ class Application extends Relation {
 
         }
         
-        $this->host = "$server_protocol://$server_name:$server_port";
-
+        //$this->host = "$server_protocol://$server_name:$server_port";
+        $this->host = "";
+        
         $path = 'private/demos/default';
 
         if (isset($_SERVER['SCRIPT_NAME']) && $_SERVER['SCRIPT_NAME']) {
