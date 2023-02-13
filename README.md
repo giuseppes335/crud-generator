@@ -1,12 +1,7 @@
 # Crud generator
 
-Requirements: Php 7.1.3 - Mysql 5.7
+Start from terminal: php -S 127.0.0.1:8000 
 
-Install via composer
+Navigate at: https://giuseppes335-psychic-adventure-x6xg5596xpw3wv7-8000.preview.app.github.dev/?migrate
 
-Configure database connection at private/include/configuration.php and start Mysql on port 3306
-
-Start a local built-in server php -S 127.0.0.1:8000 
-
-Navigate at http://127.0.0.1:8000?migrate
 
